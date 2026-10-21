@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="740" viewBox="0 0 1120 740">
+<rect width="1120" height="740" fill="rgb(247,245,240)"/>
+<text x="28" y="32" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="18" fill="rgb(31,41,51)">安全启动</text>
+<rect x="28" y="44" width="14" height="14" rx="2" fill="rgb(190,24,93)"/>
+<text x="48" y="56" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(190,24,93)" font-weight="700">公钥：只有这一把，每一级都用它</text>
+<rect x="16" y="74" width="1088" height="620" rx="8" fill="rgb(255,255,255)" stroke="rgb(226,221,212)"/>
+<text x="28" y="96" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(31,41,51)">先烧写一次。之后 BL2、BL31、OP-TEE 和 Linux 都用它验签。</text>
+<rect x="20" y="108" width="640" height="574" fill="rgb(245,240,252)"/>
+<rect x="660" y="108" width="440" height="574" fill="rgb(255,246,238)"/>
+<rect x="20" y="200" width="1080" height="148" fill="rgb(255,220,184)"/>
+<text x="36" y="128" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="rgb(109,40,217)">启动镜像</text>
+<text x="676" y="128" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="rgb(4,120,87)">安全侧</text>
+<line x1="120" y1="200" x2="120" y2="668" stroke="rgb(109,40,217)" stroke-dasharray="4 4" stroke-width="1.25"/>
+<rect x="54" y="140" width="132" height="48" rx="6" fill="rgb(237,233,254)" stroke="rgb(109,40,217)" stroke-width="1.75"/>
+<text x="120" y="162" text-anchor="middle" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="15" font-weight="700" fill="rgb(109,40,217)">BL2</text>
+<text x="120" y="178" text-anchor="middle" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="11" fill="rgb(109,40,217)">SBL</text>
+<line x1="330" y1="200" x2="330" y2="668" stroke="rgb(109,40,217)" stroke-dasharray="4 4" stroke-width="1.25"/>
+<rect x="264" y="140" width="132" height="48" rx="6" fill="rgb(237,233,254)" stroke="rgb(109,40,217)" stroke-width="1.75"/>
+<text x="330" y="169" text-anchor="middle" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="15" font-weight="700" fill="rgb(109,40,217)">BL31</text>
+<line x1="540" y1="200" x2="540" y2="668" stroke="rgb(109,40,217)" stroke-dasharray="4 4" stroke-width="1.25"/>
+<rect x="474" y="140" width="132" height="48" rx="6" fill="rgb(237,233,254)" stroke="rgb(109,40,217)" stroke-width="1.75"/>
+<text x="540" y="162" text-anchor="middle" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="15" font-weight="700" fill="rgb(109,40,217)">OP-TEE</text>
+<text x="540" y="178" text-anchor="middle" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="11" fill="rgb(109,40,217)">Linux</text>
+<line x1="780" y1="200" x2="780" y2="668" stroke="rgb(4,120,87)" stroke-dasharray="4 4" stroke-width="1.25"/>
+<rect x="714" y="140" width="132" height="48" rx="6" fill="rgb(209,250,229)" stroke="rgb(4,120,87)" stroke-width="1.75"/>
+<text x="780" y="169" text-anchor="middle" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="15" font-weight="700" fill="rgb(4,120,87)">HSM</text>
+<line x1="1000" y1="200" x2="1000" y2="668" stroke="rgb(194,65,12)" stroke-dasharray="4 4" stroke-width="1.25"/>
+<rect x="934" y="140" width="132" height="48" rx="6" fill="rgb(255,237,213)" stroke="rgb(194,65,12)" stroke-width="1.75"/>
+<text x="1000" y="162" text-anchor="middle" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="15" font-weight="700" fill="rgb(194,65,12)">OTP</text>
+<text x="1000" y="178" text-anchor="middle" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="11" fill="rgb(194,65,12)">eFuse</text>
+<text x="36" y="222" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" font-weight="700" fill="rgb(194,65,12)">烧写</text>
+<line x1="50" y1="256" x2="991" y2="256" stroke="rgb(194,65,12)" stroke-width="1.6"/>
+<polygon points="1000,256 991,252 991,260" fill="rgb(194,65,12)"/>
+<text x="520.5" y="246" text-anchor="middle" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13"><tspan fill="rgb(194,65,12)">把</tspan><tspan fill="rgb(190,24,93)" font-weight="700">公钥</tspan><tspan fill="rgb(194,65,12)">烧进 eFuse</tspan></text>
+<text x="36" y="284" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)">ROM code 读的是这一段。CLOSED 之后拒绝再写。</text>
+<line x1="998" y1="318" x2="789" y2="318" stroke="rgb(194,65,12)" stroke-width="1.6"/>
+<polygon points="780,318 789,314 789,322" fill="rgb(194,65,12)"/>
+<text x="893.5" y="308" text-anchor="middle" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13"><tspan fill="rgb(194,65,12)">烧入 </tspan><tspan fill="rgb(190,24,93)" font-weight="700">hash(公钥)</tspan><tspan fill="rgb(194,65,12)"> 到 HSM</tspan></text>
+<text x="36" y="360" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" font-weight="700" fill="rgb(109,40,217)">启动</text>
+<line x1="122" y1="398" x2="771" y2="398" stroke="rgb(109,40,217)" stroke-width="1.6"/>
+<polygon points="780,398 771,394 771,402" fill="rgb(109,40,217)"/>
+<text x="446.5" y="388" text-anchor="middle" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13"><tspan fill="rgb(109,40,217)">BL2：用</tspan><tspan fill="rgb(190,24,93)" font-weight="700">公钥</tspan><tspan fill="rgb(109,40,217)">验签</tspan></text>
+<line x1="332" y1="450" x2="771" y2="450" stroke="rgb(109,40,217)" stroke-width="1.6"/>
+<polygon points="780,450 771,446 771,454" fill="rgb(109,40,217)"/>
+<text x="551.5" y="440" text-anchor="middle" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13"><tspan fill="rgb(109,40,217)">BL31：同一把</tspan><tspan fill="rgb(190,24,93)" font-weight="700">公钥</tspan></text>
+<line x1="542" y1="502" x2="771" y2="502" stroke="rgb(109,40,217)" stroke-width="1.6"/>
+<polygon points="780,502 771,498 771,506" fill="rgb(109,40,217)"/>
+<text x="656.5" y="492" text-anchor="middle" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12"><tspan fill="rgb(109,40,217)">OP-TEE、Linux：同一把</tspan><tspan fill="rgb(190,24,93)" font-weight="700">公钥</tspan></text>
+<line x1="778" y1="560" x2="129" y2="560" stroke="rgb(4,120,87)" stroke-width="1.6"/>
+<polygon points="120,560 129,556 129,564" fill="rgb(4,120,87)"/>
+<text x="453.5" y="550" text-anchor="middle" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13"><tspan fill="rgb(4,120,87)">一致：执行这份镜像</tspan></text>
+<line x1="778" y1="612" x2="129" y2="612" stroke="rgb(4,120,87)" stroke-width="1.6" stroke-dasharray="5 3"/>
+<polygon points="120,612 129,608 129,616" fill="rgb(4,120,87)"/>
+<text x="453.5" y="602" text-anchor="middle" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13"><tspan fill="rgb(153,27,27)" font-weight="700">不一致：停止</tspan></text>
+<text x="28" y="718" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(31,41,51)">ROM 验 BL2，BL2 验 BL31，BL31 验 OP-TEE 和 Linux。同一把<tspan fill="rgb(190,24,93)" font-weight="700">公钥</tspan>。没有 CA。</text>
+</svg>

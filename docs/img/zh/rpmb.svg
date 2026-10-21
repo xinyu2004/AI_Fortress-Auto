@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="960" viewBox="0 0 1240 960">
+<rect width="1240" height="960" fill="rgb(247,245,240)"/>
+<text x="28" y="32" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="18" fill="rgb(31,41,51)">RPMB：ta-ota 组帧，tee-supplicant 搬运</text>
+<rect x="16" y="48" width="1208" height="880" rx="8" fill="rgb(255,255,255)" stroke="rgb(226,221,212)"/>
+<rect x="24" y="64" width="1192" height="300" fill="rgb(255,220,184)"/>
+<text x="40" y="88" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(194,65,12)" font-weight="700">只做一次</text>
+<line x1="170" y1="180" x2="170" y2="344" stroke="rgb(194,65,12)" stroke-dasharray="4 4" stroke-width="1.25"/>
+<line x1="490" y1="180" x2="490" y2="344" stroke="rgb(15,110,110)" stroke-dasharray="4 4" stroke-width="1.25"/>
+<line x1="810" y1="180" x2="810" y2="344" stroke="rgb(92,107,115)" stroke-dasharray="4 4" stroke-width="1.25"/>
+<line x1="1110" y1="180" x2="1110" y2="344" stroke="rgb(194,65,12)" stroke-dasharray="4 4" stroke-width="1.25"/>
+<rect x="86" y="108" width="168" height="48" rx="6" fill="rgb(255,255,255)" stroke="rgb(194,65,12)" stroke-width="1.6"/>
+<text x="170" y="128" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(194,65,12)" text-anchor="middle" font-weight="700">OTP</text>
+<text x="170" y="144" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="11" fill="rgb(194,65,12)" text-anchor="middle">eFuse</text>
+<rect x="412" y="116" width="156" height="34" rx="6" fill="rgb(204,251,241)" stroke="rgb(15,110,110)" stroke-width="1.6"/>
+<text x="490" y="138" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(15,110,110)" text-anchor="middle" font-weight="700">ta-ota</text>
+<rect x="726" y="116" width="168" height="34" rx="6" fill="rgb(255,255,255)" stroke="rgb(92,107,115)" stroke-width="1.6"/>
+<text x="810" y="138" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(92,107,115)" text-anchor="middle" font-weight="700">tee-supplicant</text>
+<rect x="1026" y="108" width="168" height="48" rx="6" fill="rgb(255,255,255)" stroke="rgb(194,65,12)" stroke-width="1.6"/>
+<text x="1110" y="128" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(194,65,12)" text-anchor="middle" font-weight="700">RPMB partition</text>
+<text x="1110" y="144" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="11" fill="rgb(194,65,12)" text-anchor="middle">eMMC or UFS</text>
+<line x1="178" y1="220" x2="473" y2="220" stroke="rgb(194,65,12)" stroke-width="1.6"/>
+<polygon points="482,220 473,216 473,224" fill="rgb(194,65,12)"/>
+<text x="330.0" y="210" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="11" fill="rgb(194,65,12)" text-anchor="middle">读取 HUK</text>
+<line x1="498" y1="270" x2="793" y2="270" stroke="rgb(15,110,110)" stroke-width="1.6"/>
+<polygon points="802,270 793,266 793,274" fill="rgb(15,110,110)"/>
+<text x="650.0" y="260" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="11" fill="rgb(15,110,110)" text-anchor="middle">OPTEE_RPC_CMD_RPMB</text>
+<line x1="818" y1="320" x2="1093" y2="320" stroke="rgb(92,107,115)" stroke-width="1.6"/>
+<polygon points="1102,320 1093,316 1093,324" fill="rgb(92,107,115)"/>
+<text x="960.0" y="310" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="11" fill="rgb(92,107,115)" text-anchor="middle">写入密钥，只此一次</text>
+<text x="40" y="392" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(15,110,110)" font-weight="700">KVN 与 min SVN</text>
+<rect x="24" y="406" width="586" height="470" fill="rgb(245,240,252)"/>
+<rect x="610" y="406" width="330" height="470" fill="rgb(255,246,238)"/>
+<text x="317.0" y="430" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(29,78,216)" text-anchor="middle" font-weight="700">非安全区</text>
+<text x="775.0" y="430" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(4,120,87)" text-anchor="middle" font-weight="700">安全区</text>
+<line x1="180" y1="500" x2="180" y2="840" stroke="rgb(29,78,216)" stroke-dasharray="4 4" stroke-width="1.25"/>
+<line x1="440" y1="500" x2="440" y2="840" stroke="rgb(92,107,115)" stroke-dasharray="4 4" stroke-width="1.25"/>
+<line x1="780" y1="500" x2="780" y2="840" stroke="rgb(15,110,110)" stroke-dasharray="4 4" stroke-width="1.25"/>
+<line x1="1100" y1="500" x2="1100" y2="840" stroke="rgb(194,65,12)" stroke-dasharray="4 4" stroke-width="1.25"/>
+<rect x="102" y="444" width="156" height="34" rx="6" fill="rgb(219,234,254)" stroke="rgb(29,78,216)" stroke-width="1.6"/>
+<text x="180" y="466" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(29,78,216)" text-anchor="middle" font-weight="700">ca-ota</text>
+<rect x="356" y="444" width="168" height="34" rx="6" fill="rgb(255,255,255)" stroke="rgb(92,107,115)" stroke-width="1.6"/>
+<text x="440" y="466" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(92,107,115)" text-anchor="middle" font-weight="700">tee-supplicant</text>
+<rect x="702" y="444" width="156" height="34" rx="6" fill="rgb(204,251,241)" stroke="rgb(15,110,110)" stroke-width="1.6"/>
+<text x="780" y="466" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(15,110,110)" text-anchor="middle" font-weight="700">ta-ota</text>
+<rect x="1016" y="436" width="168" height="48" rx="6" fill="rgb(255,237,213)" stroke="rgb(194,65,12)" stroke-width="1.6"/>
+<text x="1100" y="456" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(194,65,12)" text-anchor="middle" font-weight="700">RPMB partition</text>
+<text x="1100" y="472" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="11" fill="rgb(194,65,12)" text-anchor="middle">eMMC or UFS</text>
+<line x1="188" y1="540" x2="763" y2="540" stroke="rgb(29,78,216)" stroke-width="1.6"/>
+<polygon points="772,540 763,536 763,544" fill="rgb(29,78,216)"/>
+<text x="650.0" y="530" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="11" fill="rgb(29,78,216)" text-anchor="middle">更新密钥，或激活</text>
+<line x1="772" y1="590" x2="457" y2="590" stroke="rgb(15,110,110)" stroke-width="1.6"/>
+<polygon points="448,590 457,586 457,594" fill="rgb(15,110,110)"/>
+<text x="650.0" y="580" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="11" fill="rgb(15,110,110)" text-anchor="middle">OPTEE_RPC_CMD_RPMB</text>
+<line x1="448" y1="640" x2="1083" y2="640" stroke="rgb(92,107,115)" stroke-width="1.6"/>
+<polygon points="1092,640 1083,636 1083,644" fill="rgb(92,107,115)"/>
+<text x="940.0" y="630" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="11" fill="rgb(92,107,115)" text-anchor="middle">同一帧，不含密钥</text>
+<line x1="1092" y1="690" x2="457" y2="690" stroke="rgb(92,107,115)" stroke-width="1.6" stroke-dasharray="5 3"/>
+<polygon points="448,690 457,686 457,694" fill="rgb(92,107,115)"/>
+<text x="620" y="680" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="11" fill="rgb(92,107,115)" text-anchor="middle">HMAC 通过：计数加一</text>
+<line x1="1092" y1="740" x2="457" y2="740" stroke="rgb(153,27,27)" stroke-width="1.6" stroke-dasharray="5 3"/>
+<polygon points="448,740 457,736 457,744" fill="rgb(153,27,27)"/>
+<text x="620" y="730" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="11" fill="rgb(153,27,27)" text-anchor="middle">旧计数：拒绝</text>
+<line x1="448" y1="800" x2="763" y2="800" stroke="rgb(92,107,115)" stroke-width="1.6" stroke-dasharray="5 3"/>
+<polygon points="772,800 763,796 763,804" fill="rgb(92,107,115)"/>
+<text x="650.0" y="790" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="11" fill="rgb(92,107,115)" text-anchor="middle">结果</text>
+<text x="40" y="860" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)">帧里是 KVN（新的二级公钥被接受之后），或 min SVN（只有激活才写）。</text>
+<text x="28" y="944" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)">ca-ota 的箭头停在 ta-ota。tee-supplicant 只搬运帧。HMAC 密钥留在 ta-ota。</text>
+</svg>

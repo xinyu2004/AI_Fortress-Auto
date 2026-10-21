@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="1080" viewBox="0 0 1240 1080">
+<rect width="1240" height="1080" fill="rgb(247,245,240)"/>
+<text x="28" y="34" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="18" fill="rgb(31,41,51)">eMMC：版本检查用的是 RPMB 分区里的 KVN 和 min SVN</text>
+<rect x="16" y="52" width="360" height="1004" rx="8" fill="rgb(255,255,255)" stroke="rgb(226,221,212)"/>
+<text x="36" y="80" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="16" fill="rgb(31,41,51)" font-weight="700">eMMC</text>
+<rect x="36" y="96" width="320" height="56" rx="6" fill="rgb(255,255,255)" stroke="rgb(92,107,115)" stroke-width="1.4"/>
+<text x="196" y="118" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(31,41,51)" text-anchor="middle" font-weight="700">Boot Area Partition 1</text>
+<text x="196" y="138" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="11" fill="rgb(92,107,115)" text-anchor="middle">启动镜像</text>
+<rect x="36" y="160" width="320" height="56" rx="6" fill="rgb(255,255,255)" stroke="rgb(92,107,115)" stroke-width="1.4"/>
+<text x="196" y="182" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(31,41,51)" text-anchor="middle" font-weight="700">Boot Area Partition 2</text>
+<text x="196" y="202" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="11" fill="rgb(92,107,115)" text-anchor="middle">第二份启动镜像</text>
+<rect x="36" y="224" width="320" height="220" rx="6" fill="rgb(255,237,213)" stroke="rgb(194,65,12)" stroke-width="1.8"/>
+<text x="196" y="252" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="14" fill="rgb(194,65,12)" text-anchor="middle" font-weight="700">RPMB Partition</text>
+<text x="196" y="274" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="11" fill="rgb(194,65,12)" text-anchor="middle">版本检查用来比较的两个数</text>
+<rect x="52" y="292" width="288" height="40" rx="4" fill="rgb(255,255,255)" stroke="rgb(194,65,12)"/>
+<text x="196" y="317" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(194,65,12)" text-anchor="middle" font-weight="700">KVN</text>
+<rect x="52" y="342" width="288" height="40" rx="4" fill="rgb(255,255,255)" stroke="rgb(194,65,12)"/>
+<text x="196" y="367" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(194,65,12)" text-anchor="middle" font-weight="700">min SVN</text>
+<text x="196" y="420" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="11" fill="rgb(194,65,12)" text-anchor="middle">HMAC 密钥在客户下线写入一次</text>
+<rect x="36" y="456" width="320" height="44" rx="6" fill="rgb(255,255,255)" stroke="rgb(92,107,115)" stroke-width="1.4"/>
+<text x="196" y="483" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(31,41,51)" text-anchor="middle">General Purpose Partition 1</text>
+<rect x="36" y="508" width="320" height="44" rx="6" fill="rgb(255,255,255)" stroke="rgb(92,107,115)" stroke-width="1.4"/>
+<text x="196" y="535" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(31,41,51)" text-anchor="middle">General Purpose Partition 2</text>
+<rect x="36" y="560" width="320" height="44" rx="6" fill="rgb(255,255,255)" stroke="rgb(92,107,115)" stroke-width="1.4"/>
+<text x="196" y="587" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(31,41,51)" text-anchor="middle">General Purpose Partition 3</text>
+<rect x="36" y="612" width="320" height="44" rx="6" fill="rgb(255,255,255)" stroke="rgb(92,107,115)" stroke-width="1.4"/>
+<text x="196" y="639" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(31,41,51)" text-anchor="middle">General Purpose Partition 4</text>
+<rect x="36" y="672" width="320" height="360" rx="6" fill="rgb(255,255,255)" stroke="rgb(92,107,115)" stroke-width="1.4"/>
+<text x="196" y="840" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="14" fill="rgb(31,41,51)" text-anchor="middle" font-weight="700">User Data Area</text>
+<text x="196" y="866" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(92,107,115)" text-anchor="middle">重写这一区</text>
+<text x="196" y="886" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(92,107,115)" text-anchor="middle">不改变 KVN 和 min SVN</text>
+<rect x="392" y="52" width="824" height="1004" rx="8" fill="rgb(255,255,255)" stroke="rgb(226,221,212)"/>
+<text x="412" y="86" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="16" fill="rgb(31,41,51)" font-weight="700">版本检查</text>
+<text x="412" y="112" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(92,107,115)">拿送来的版本和 RPMB 里已保存的数比较。</text>
+<rect x="412" y="136" width="220" height="52" rx="6" fill="rgb(255,237,213)" stroke="rgb(194,65,12)"/>
+<text x="522" y="168" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="14" fill="rgb(194,65,12)" text-anchor="middle" font-weight="700">已保存的 KVN</text>
+<rect x="652" y="136" width="220" height="52" rx="6" fill="rgb(255,237,213)" stroke="rgb(194,65,12)"/>
+<text x="762" y="168" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="14" fill="rgb(194,65,12)" text-anchor="middle" font-weight="700">已保存的 min SVN</text>
+<text x="412" y="230" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="15" fill="rgb(15,110,110)" font-weight="700">0x31 F000</text>
+<text x="412" y="254" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(31,41,51)">Key Manifest 里带着新的二级公钥和它的 KVN。</text>
+<rect x="412" y="274" width="250" height="56" rx="6" fill="rgb(255,255,255)" stroke="rgb(15,110,110)" stroke-width="1.6"/>
+<text x="537" y="307" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="14" fill="rgb(15,110,110)" text-anchor="middle" font-weight="700">清单 KVN</text>
+<text x="700" y="308" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="22" fill="rgb(31,41,51)" text-anchor="middle" font-weight="700">&gt;</text>
+<rect x="748" y="274" width="250" height="56" rx="6" fill="rgb(255,237,213)" stroke="rgb(194,65,12)" stroke-width="1.6"/>
+<text x="873" y="307" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="14" fill="rgb(194,65,12)" text-anchor="middle" font-weight="700">已保存的 KVN</text>
+<rect x="412" y="348" width="380" height="64" rx="6" fill="rgb(204,251,241)" stroke="rgb(15,110,110)"/>
+<text x="602" y="374" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(15,110,110)" text-anchor="middle" font-weight="700">更大</text>
+<text x="602" y="396" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(15,110,110)" text-anchor="middle">写入新 KVN，替换公钥</text>
+<rect x="808" y="348" width="380" height="64" rx="6" fill="rgb(254,242,242)" stroke="rgb(153,27,27)"/>
+<text x="998" y="374" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(153,27,27)" text-anchor="middle" font-weight="700">相等或更小</text>
+<text x="998" y="396" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(153,27,27)" text-anchor="middle">保持已保存的 KVN 和公钥</text>
+<text x="412" y="440" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(92,107,115)">根公钥验这份清单。0x27 用已保存 KVN 对应的那把公钥验签名。</text>
+<text x="412" y="500" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="15" fill="rgb(15,110,110)" font-weight="700">0x31 F002</text>
+<text x="412" y="524" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(31,41,51)">这一帧不下发 KVN，也不下发 SVN。两个数已经在镜像头里。</text>
+<rect x="412" y="548" width="250" height="48" rx="6" fill="rgb(255,255,255)" stroke="rgb(15,110,110)" stroke-width="1.6"/>
+<text x="537" y="578" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="14" fill="rgb(15,110,110)" text-anchor="middle" font-weight="700">头里的 KVN</text>
+<text x="700" y="580" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="22" fill="rgb(31,41,51)" text-anchor="middle" font-weight="700">=</text>
+<rect x="748" y="548" width="250" height="48" rx="6" fill="rgb(255,237,213)" stroke="rgb(194,65,12)" stroke-width="1.6"/>
+<text x="873" y="578" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="14" fill="rgb(194,65,12)" text-anchor="middle" font-weight="700">已保存的 KVN</text>
+<rect x="412" y="612" width="250" height="48" rx="6" fill="rgb(255,255,255)" stroke="rgb(15,110,110)" stroke-width="1.6"/>
+<text x="537" y="642" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="14" fill="rgb(15,110,110)" text-anchor="middle" font-weight="700">头里的 SVN</text>
+<text x="700" y="644" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="22" fill="rgb(31,41,51)" text-anchor="middle" font-weight="700">≥</text>
+<rect x="748" y="612" width="250" height="48" rx="6" fill="rgb(255,237,213)" stroke="rgb(194,65,12)" stroke-width="1.6"/>
+<text x="873" y="642" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="14" fill="rgb(194,65,12)" text-anchor="middle" font-weight="700">min SVN</text>
+<rect x="412" y="680" width="776" height="56" rx="6" fill="rgb(204,251,241)" stroke="rgb(15,110,110)"/>
+<text x="800" y="714" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(15,110,110)" text-anchor="middle" font-weight="700">两条都成立且整包验过：min SVN 写成这个包的 SVN</text>
+<rect x="412" y="752" width="776" height="56" rx="6" fill="rgb(254,242,242)" stroke="rgb(153,27,27)"/>
+<text x="800" y="786" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(153,27,27)" text-anchor="middle" font-weight="700">否则：min SVN 保持</text>
+<text x="412" y="860" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(31,41,51)">重写 User Data Area 之后，这两次比较用的数仍然不变。</text>
+<text x="412" y="892" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(92,107,115)">HMAC 密钥和写计数用来保住这两个已保存的数，不让它们退回去。</text>
+</svg>

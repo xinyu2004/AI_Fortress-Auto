@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="1208" viewBox="0 0 1120 1208">
+<rect width="1120" height="1208" fill="rgb(247,245,240)" />
+<text x="28" y="32" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="18" fill="rgb(31,41,51)">谁和谁说话</text>
+<rect x="16" y="52" width="1088" height="548" rx="8" fill="rgb(255,255,255)" stroke="rgb(226,221,212)" />
+<text x="28" y="76" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="16" fill="rgb(31,41,51)" font-weight="700">SecOC</text>
+<rect x="20" y="88" width="540" height="504" fill="rgb(245,240,252)" />
+<rect x="560" y="88" width="540" height="504" fill="rgb(255,246,238)" />
+<text x="36" y="106" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(29,78,216)" font-weight="700">非安全区</text>
+<text x="576" y="106" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(4,120,87)" font-weight="700">安全区</text>
+<line x1="200" y1="162" x2="200" y2="586" stroke="rgb(29,78,216)" stroke-dasharray="4 4" stroke-width="1.25" />
+<rect x="136" y="116" width="128" height="34" rx="6" fill="rgb(219,234,254)" stroke="rgb(29,78,216)" stroke-width="1.6" />
+<text x="200" y="138" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(29,78,216)" text-anchor="middle" font-weight="700">perception</text>
+<line x1="420" y1="162" x2="420" y2="586" stroke="rgb(29,78,216)" stroke-dasharray="4 4" stroke-width="1.25" />
+<rect x="356" y="116" width="128" height="34" rx="6" fill="rgb(219,234,254)" stroke="rgb(29,78,216)" stroke-width="1.6" />
+<text x="420" y="138" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(29,78,216)" text-anchor="middle" font-weight="700">planning</text>
+<line x1="740" y1="162" x2="740" y2="586" stroke="rgb(15,110,110)" stroke-dasharray="4 4" stroke-width="1.25" />
+<rect x="676" y="116" width="128" height="34" rx="6" fill="rgb(204,251,241)" stroke="rgb(15,110,110)" stroke-width="1.6" />
+<text x="740" y="138" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(15,110,110)" text-anchor="middle" font-weight="700">ta-soa</text>
+<line x1="980" y1="162" x2="980" y2="586" stroke="rgb(4,120,87)" stroke-dasharray="4 4" stroke-width="1.25" />
+<rect x="916" y="116" width="128" height="34" rx="6" fill="rgb(209,250,229)" stroke="rgb(4,120,87)" stroke-width="1.6" />
+<text x="980" y="138" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(4,120,87)" text-anchor="middle" font-weight="700">HSM</text>
+<text x="36" y="186" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)" font-weight="700">发送</text>
+<line x1="202" y1="220" x2="731" y2="220" stroke="rgb(29,78,216)" stroke-width="1.6" />
+<polygon points="740,220 731,216 731,224" fill="rgb(29,78,216)" />
+<text x="466" y="210" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(29,78,216)" text-anchor="middle">SEAL，明文</text>
+<line x1="742" y1="264" x2="908" y2="264" stroke="rgb(15,110,110)" stroke-width="1.6" />
+<line x1="908" y1="264" x2="908" y2="280" stroke="rgb(15,110,110)" stroke-width="1.6" />
+<line x1="908" y1="280" x2="750" y2="280" stroke="rgb(15,110,110)" stroke-width="1.6" />
+<polygon points="740,280 750,276 750,284" fill="rgb(15,110,110)" />
+<text x="826" y="256" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(15,110,110)" text-anchor="middle">读取新鲜度</text>
+<line x1="738" y1="324" x2="209" y2="324" stroke="rgb(153,27,27)" stroke-width="1.6" stroke-dasharray="5 3" />
+<polygon points="200,324 209,320 209,328" fill="rgb(153,27,27)" />
+<text x="470" y="314" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(153,27,27)" text-anchor="middle" font-weight="700">新鲜度不符：不加密</text>
+<line x1="742" y1="368" x2="971" y2="368" stroke="rgb(15,110,110)" stroke-width="1.6" />
+<polygon points="980,368 971,364 971,372" fill="rgb(15,110,110)" />
+<text x="856" y="358" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(15,110,110)" text-anchor="middle">通过后才 C_Encrypt</text>
+<line x1="742" y1="412" x2="908" y2="412" stroke="rgb(15,110,110)" stroke-width="1.6" />
+<line x1="908" y1="412" x2="908" y2="428" stroke="rgb(15,110,110)" stroke-width="1.6" />
+<line x1="908" y1="428" x2="750" y2="428" stroke="rgb(15,110,110)" stroke-width="1.6" />
+<polygon points="740,428 750,424 750,432" fill="rgb(15,110,110)" />
+<text x="826" y="404" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(15,110,110)" text-anchor="middle">加密成功才新鲜度加一</text>
+<line x1="202" y1="472" x2="411" y2="472" stroke="rgb(29,78,216)" stroke-width="1.6" />
+<polygon points="420,472 411,468 411,476" fill="rgb(29,78,216)" />
+<text x="306" y="462" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(29,78,216)" text-anchor="middle">密文帧</text>
+<text x="36" y="510" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)" font-weight="700">接收</text>
+<line x1="422" y1="544" x2="731" y2="544" stroke="rgb(29,78,216)" stroke-width="1.6" />
+<polygon points="740,544 731,540 731,548" fill="rgb(29,78,216)" />
+<text x="576" y="534" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(29,78,216)" text-anchor="middle">OPEN</text>
+<line x1="738" y1="572" x2="429" y2="572" stroke="rgb(153,27,27)" stroke-width="1.6" stroke-dasharray="5 3" />
+<polygon points="420,572 429,568 429,576" fill="rgb(153,27,27)" />
+<text x="584" y="562" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(153,27,27)" text-anchor="middle" font-weight="700">重放：不返回明文</text>
+<rect x="16" y="616" width="1088" height="548" rx="8" fill="rgb(255,255,255)" stroke="rgb(226,221,212)" />
+<text x="28" y="640" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="16" fill="rgb(31,41,51)" font-weight="700">OTA security</text>
+<rect x="20" y="652" width="290" height="504" fill="rgb(245,240,252)" />
+<rect x="310" y="652" width="790" height="504" fill="rgb(255,246,238)" />
+<text x="36" y="670" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(29,78,216)" font-weight="700">非安全区</text>
+<text x="326" y="670" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(4,120,87)" font-weight="700">安全区</text>
+<line x1="170" y1="726" x2="170" y2="1150" stroke="rgb(29,78,216)" stroke-dasharray="4 4" stroke-width="1.25" />
+<rect x="106" y="680" width="128" height="34" rx="6" fill="rgb(219,234,254)" stroke="rgb(29,78,216)" stroke-width="1.6" />
+<text x="170" y="702" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(29,78,216)" text-anchor="middle" font-weight="700">ca-ota</text>
+<line x1="450" y1="726" x2="450" y2="1150" stroke="rgb(15,110,110)" stroke-dasharray="4 4" stroke-width="1.25" />
+<rect x="386" y="680" width="128" height="34" rx="6" fill="rgb(204,251,241)" stroke="rgb(15,110,110)" stroke-width="1.6" />
+<text x="450" y="702" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(15,110,110)" text-anchor="middle" font-weight="700">ta-ota</text>
+<line x1="730" y1="726" x2="730" y2="1150" stroke="rgb(4,120,87)" stroke-dasharray="4 4" stroke-width="1.25" />
+<rect x="666" y="680" width="128" height="34" rx="6" fill="rgb(209,250,229)" stroke="rgb(4,120,87)" stroke-width="1.6" />
+<text x="730" y="702" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(4,120,87)" text-anchor="middle" font-weight="700">HSM</text>
+<line x1="1000" y1="726" x2="1000" y2="1150" stroke="rgb(194,65,12)" stroke-dasharray="4 4" stroke-width="1.25" />
+<rect x="936" y="680" width="128" height="34" rx="6" fill="rgb(255,237,213)" stroke="rgb(194,65,12)" stroke-width="1.6" />
+<text x="1000" y="702" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(194,65,12)" text-anchor="middle" font-weight="700">RPMB</text>
+<text x="36" y="750" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)" font-weight="700">更新密钥</text>
+<line x1="172" y1="784" x2="441" y2="784" stroke="rgb(29,78,216)" stroke-width="1.6" />
+<polygon points="450,784 441,780 441,788" fill="rgb(29,78,216)" />
+<text x="306" y="774" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(29,78,216)" text-anchor="middle">Key Manifest</text>
+<line x1="452" y1="828" x2="721" y2="828" stroke="rgb(15,110,110)" stroke-width="1.6" />
+<polygon points="730,828 721,824 721,832" fill="rgb(15,110,110)" />
+<text x="586" y="818" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(15,110,110)" text-anchor="middle">根公钥验签</text>
+<line x1="452" y1="872" x2="721" y2="872" stroke="rgb(15,110,110)" stroke-width="1.6" />
+<polygon points="730,872 721,868 721,876" fill="rgb(15,110,110)" />
+<text x="586" y="862" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(15,110,110)" text-anchor="middle">KVN 更大才存新公钥</text>
+<line x1="452" y1="916" x2="991" y2="916" stroke="rgb(15,110,110)" stroke-width="1.6" />
+<polygon points="1000,916 991,912 991,920" fill="rgb(15,110,110)" />
+<text x="721" y="906" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(15,110,110)" text-anchor="middle">写入 KVN</text>
+<text x="36" y="954" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)" font-weight="700">刷后验证</text>
+<line x1="172" y1="988" x2="441" y2="988" stroke="rgb(29,78,216)" stroke-width="1.6" />
+<polygon points="450,988 441,984 441,992" fill="rgb(29,78,216)" />
+<text x="306" y="978" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(29,78,216)" text-anchor="middle">镜像头，然后每一块</text>
+<line x1="452" y1="1032" x2="721" y2="1032" stroke="rgb(15,110,110)" stroke-width="1.6" />
+<polygon points="730,1032 721,1028 721,1036" fill="rgb(15,110,110)" />
+<text x="586" y="1022" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(15,110,110)" text-anchor="middle">整包验签</text>
+<line x1="452" y1="1076" x2="991" y2="1076" stroke="rgb(15,110,110)" stroke-width="1.6" />
+<polygon points="1000,1076 991,1072 991,1080" fill="rgb(15,110,110)" />
+<text x="721" y="1066" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(15,110,110)" text-anchor="middle">KVN 相等，SVN &gt;= min</text>
+<line x1="452" y1="1120" x2="991" y2="1120" stroke="rgb(15,110,110)" stroke-width="1.6" />
+<polygon points="1000,1120 991,1116 991,1124" fill="rgb(15,110,110)" />
+<text x="721" y="1110" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(15,110,110)" text-anchor="middle">三项都成立才写 min SVN</text>
+<text x="28" y="1194" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)">实线是请求，虚线是返回，红字是拒绝，计数不写。</text>
+</svg>

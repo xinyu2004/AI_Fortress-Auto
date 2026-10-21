@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="980" viewBox="0 0 1120 980">
+<rect width="1120" height="980" fill="rgb(247,245,240)"/>
+<text x="28" y="32" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="18" fill="rgb(31,41,51)">SecOC</text>
+<rect x="16" y="48" width="1088" height="900" rx="8" fill="rgb(255,255,255)" stroke="rgb(226,221,212)"/>
+<rect x="20" y="60" width="540" height="876" fill="rgb(245,240,252)"/>
+<rect x="560" y="60" width="540" height="876" fill="rgb(255,246,238)"/>
+<text x="36" y="82" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(29,78,216)" font-weight="700">Non-secure</text>
+<text x="576" y="82" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(4,120,87)" font-weight="700">Secure</text>
+<line x1="200" y1="150" x2="200" y2="900" stroke="rgb(29,78,216)" stroke-dasharray="4 4" stroke-width="1.25"/>
+<line x1="420" y1="150" x2="420" y2="900" stroke="rgb(29,78,216)" stroke-dasharray="4 4" stroke-width="1.25"/>
+<line x1="740" y1="150" x2="740" y2="900" stroke="rgb(15,110,110)" stroke-dasharray="4 4" stroke-width="1.25"/>
+<line x1="980" y1="150" x2="980" y2="900" stroke="rgb(4,120,87)" stroke-dasharray="4 4" stroke-width="1.25"/>
+<rect x="126" y="96" width="148" height="34" rx="6" fill="rgb(219,234,254)" stroke="rgb(29,78,216)" stroke-width="1.6"/>
+<text x="200" y="118" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(29,78,216)" text-anchor="middle" font-weight="700">perception</text>
+<rect x="346" y="96" width="148" height="34" rx="6" fill="rgb(219,234,254)" stroke="rgb(29,78,216)" stroke-width="1.6"/>
+<text x="420" y="118" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(29,78,216)" text-anchor="middle" font-weight="700">planning</text>
+<rect x="666" y="96" width="148" height="34" rx="6" fill="rgb(204,251,241)" stroke="rgb(15,110,110)" stroke-width="1.6"/>
+<text x="740" y="118" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(15,110,110)" text-anchor="middle" font-weight="700">ta-soa</text>
+<rect x="906" y="96" width="148" height="34" rx="6" fill="rgb(209,250,229)" stroke="rgb(4,120,87)" stroke-width="1.6"/>
+<text x="980" y="118" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(4,120,87)" text-anchor="middle" font-weight="700">HSM</text>
+<text x="36" y="176" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)" font-weight="700">Send</text>
+<line x1="208" y1="210" x2="723" y2="210" stroke="rgb(29,78,216)" stroke-width="1.6"/>
+<polygon points="732,210 723,206 723,214" fill="rgb(29,78,216)"/>
+<text x="470.0" y="200" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(29,78,216)" text-anchor="middle">SEAL, plaintext</text>
+<line x1="742" y1="254" x2="890" y2="254" stroke="rgb(15,110,110)" stroke-width="1.6"/>
+<line x1="890" y1="254" x2="890" y2="270" stroke="rgb(15,110,110)" stroke-width="1.6"/>
+<line x1="890" y1="270" x2="751" y2="270" stroke="rgb(15,110,110)" stroke-width="1.6"/>
+<polygon points="740,270 751,266 751,274" fill="rgb(15,110,110)"/>
+<text x="815.0" y="246" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(15,110,110)" text-anchor="middle">read freshness</text>
+<line x1="732" y1="320" x2="217" y2="320" stroke="rgb(153,27,27)" stroke-width="1.6" stroke-dasharray="5 3"/>
+<polygon points="208,320 217,316 217,324" fill="rgb(153,27,27)"/>
+<text x="470.0" y="310" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(153,27,27)" text-anchor="middle">freshness mismatch: no encrypt</text>
+<line x1="748" y1="364" x2="963" y2="364" stroke="rgb(15,110,110)" stroke-width="1.6"/>
+<polygon points="972,364 963,360 963,368" fill="rgb(15,110,110)"/>
+<text x="860.0" y="354" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(15,110,110)" text-anchor="middle">then C_Encrypt</text>
+<line x1="742" y1="408" x2="890" y2="408" stroke="rgb(15,110,110)" stroke-width="1.6"/>
+<line x1="890" y1="408" x2="890" y2="424" stroke="rgb(15,110,110)" stroke-width="1.6"/>
+<line x1="890" y1="424" x2="751" y2="424" stroke="rgb(15,110,110)" stroke-width="1.6"/>
+<polygon points="740,424 751,420 751,428" fill="rgb(15,110,110)"/>
+<text x="815.0" y="400" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(15,110,110)" text-anchor="middle">encrypt ok: freshness + 1</text>
+<line x1="208" y1="468" x2="403" y2="468" stroke="rgb(29,78,216)" stroke-width="1.6"/>
+<polygon points="412,468 403,464 403,472" fill="rgb(29,78,216)"/>
+<text x="310.0" y="458" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(29,78,216)" text-anchor="middle">ciphertext frame</text>
+<text x="36" y="510" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)" font-weight="700">Receive</text>
+<line x1="428" y1="544" x2="723" y2="544" stroke="rgb(29,78,216)" stroke-width="1.6"/>
+<polygon points="732,544 723,540 723,548" fill="rgb(29,78,216)"/>
+<text x="580.0" y="534" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(29,78,216)" text-anchor="middle">OPEN</text>
+<line x1="742" y1="588" x2="890" y2="588" stroke="rgb(15,110,110)" stroke-width="1.6"/>
+<line x1="890" y1="588" x2="890" y2="604" stroke="rgb(15,110,110)" stroke-width="1.6"/>
+<line x1="890" y1="604" x2="751" y2="604" stroke="rgb(15,110,110)" stroke-width="1.6"/>
+<polygon points="740,604 751,600 751,608" fill="rgb(15,110,110)"/>
+<text x="815.0" y="580" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(15,110,110)" text-anchor="middle">read freshness</text>
+<line x1="732" y1="654" x2="437" y2="654" stroke="rgb(153,27,27)" stroke-width="1.6" stroke-dasharray="5 3"/>
+<polygon points="428,654 437,650 437,658" fill="rgb(153,27,27)"/>
+<text x="580.0" y="644" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(153,27,27)" text-anchor="middle">replay: no plaintext</text>
+<line x1="748" y1="698" x2="963" y2="698" stroke="rgb(15,110,110)" stroke-width="1.6"/>
+<polygon points="972,698 963,694 963,702" fill="rgb(15,110,110)"/>
+<text x="860.0" y="688" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(15,110,110)" text-anchor="middle">freshness ok: C_Decrypt</text>
+<line x1="972" y1="742" x2="757" y2="742" stroke="rgb(92,107,115)" stroke-width="1.6" stroke-dasharray="5 3"/>
+<polygon points="748,742 757,738 757,746" fill="rgb(92,107,115)"/>
+<text x="860.0" y="732" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(92,107,115)" text-anchor="middle">plaintext</text>
+<line x1="732" y1="786" x2="437" y2="786" stroke="rgb(15,110,110)" stroke-width="1.6" stroke-dasharray="5 3"/>
+<polygon points="428,786 437,782 437,790" fill="rgb(15,110,110)"/>
+<text x="580.0" y="776" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(15,110,110)" text-anchor="middle">plaintext only after decrypt</text>
+<text x="28" y="960" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)">The other direction uses the same two commands. Freshness stays in ta-soa for this power cycle.</text>
+</svg>

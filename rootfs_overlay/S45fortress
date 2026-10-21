@@ -1,0 +1,19 @@
+#!/bin/sh
+# Start one guest entry from the kernel command line fortress.entry=.
+entry=$(sed -n 's/.*fortress.entry=\([^ ]*\).*/\1/p' /proc/cmdline)
+
+case "$entry" in
+secoc)
+	echo "Starting SecOC"
+	/usr/bin/fortress-ota install-key /etc/fortress/soa.key || echo "SecOC key install failed"
+	/usr/bin/planning &
+	/usr/bin/perception &
+	;;
+ota)
+	echo "Starting OTA"
+	/usr/bin/fortress-ota listen &
+	;;
+*)
+	echo "No fortress.entry on the kernel command line"
+	;;
+esac
