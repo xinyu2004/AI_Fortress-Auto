@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="1040" viewBox="0 0 1120 1040">
+<rect width="1120" height="1040" fill="rgb(247,245,240)"/>
+<text x="28" y="34" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="18" fill="rgb(31,41,51)">令牌换在哪一格</text>
+<rect x="16" y="52" width="1088" height="520" rx="8" fill="rgb(255,255,255)" stroke="rgb(226,221,212)"/>
+<text x="32" y="80" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="16" fill="rgb(31,41,51)" font-weight="700">这张 QEMU 镜像</text>
+<text x="188" y="80" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(92,107,115)">密钥和运算都在 TrustZone 里</text>
+<rect x="28" y="100" width="300" height="452" fill="rgb(245,240,252)"/>
+<rect x="328" y="100" width="760" height="452" fill="rgb(255,246,238)"/>
+<text x="44" y="122" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(29,78,216)" font-weight="700">非安全区</text>
+<text x="344" y="122" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(4,120,87)" font-weight="700">安全区</text>
+<rect x="44" y="140" width="268" height="156" rx="6" fill="rgb(219,234,254)" stroke="rgb(29,78,216)" stroke-width="1.6"/>
+<text x="178" y="172" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="14" fill="rgb(29,78,216)" text-anchor="middle" font-weight="700">CA</text>
+<text x="178" y="198" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(29,78,216)" text-anchor="middle">fortress-ota</text>
+<text x="178" y="220" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(29,78,216)" text-anchor="middle">perception · planning</text>
+<text x="178" y="252" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)" text-anchor="middle">只打开 ta-ota 或 ta-soa</text>
+<line x1="312" y1="218" x2="348" y2="218" stroke="rgb(29,78,216)" stroke-width="1.6"/>
+<polygon points="356,218 348,214 348,222" fill="rgb(29,78,216)"/>
+<rect x="364" y="140" width="400" height="156" rx="6" fill="rgb(204,251,241)" stroke="rgb(15,110,110)" stroke-width="1.6"/>
+<text x="564" y="168" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="14" fill="rgb(15,110,110)" text-anchor="middle" font-weight="700">ta-soa · ta-ota</text>
+<text x="564" y="194" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)" text-anchor="middle">新鲜度留在 ta-soa</text>
+<text x="564" y="216" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)" text-anchor="middle">KVN、min SVN、根哈希留在 ta-ota</text>
+<text x="564" y="238" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)" text-anchor="middle">SHA-256 和 0x27 随机数留在 ta-ota</text>
+<text x="564" y="264" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(15,110,110)" text-anchor="middle">命令在这里判定</text>
+<rect x="780" y="140" width="288" height="156" rx="6" fill="rgb(255,255,255)" stroke="rgb(92,107,115)" stroke-width="1.4"/>
+<text x="924" y="176" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="14" fill="rgb(92,107,115)" text-anchor="middle" font-weight="700">不进令牌</text>
+<text x="924" y="206" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)" text-anchor="middle">启动公钥哈希在 OTP</text>
+<text x="924" y="230" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)" text-anchor="middle">OTA 私钥在主机</text>
+<text x="924" y="258" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(92,107,115)" text-anchor="middle">Linux 组也不改</text>
+<line x1="564" y1="296" x2="564" y2="348" stroke="rgb(15,110,110)" stroke-width="1.6"/>
+<polygon points="564,360 560,348 568,348" fill="rgb(15,110,110)"/>
+<text x="576" y="336" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(15,110,110)">TEE_OpenTASession</text>
+<rect x="364" y="368" width="704" height="164" rx="6" fill="rgb(209,250,229)" stroke="rgb(4,120,87)" stroke-width="2.4"/>
+<text x="716" y="396" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(4,120,87)" text-anchor="middle" font-weight="700">令牌 · 以后只换这一格</text>
+<text x="716" y="424" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="15" fill="rgb(4,120,87)" text-anchor="middle" font-weight="700">PKCS#11 TA</text>
+<text x="716" y="452" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(31,41,51)" text-anchor="middle">fortress-soa · AES-128，不可导出</text>
+<text x="716" y="476" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(31,41,51)" text-anchor="middle">fortress-root · fortress-image · P-256 公钥</text>
+<text x="716" y="504" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(4,120,87)" text-anchor="middle">AES-128-GCM 和 P-256 验签在这里做</text>
+<rect x="44" y="420" width="268" height="96" rx="6" fill="rgb(254,242,242)" stroke="rgb(153,27,27)" stroke-width="1.6" stroke-dasharray="5 3"/>
+<text x="178" y="458" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="14" fill="rgb(153,27,27)" text-anchor="middle" font-weight="700">pkcs11-tool</text>
+<text x="178" y="486" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(153,27,27)" text-anchor="middle">直接开会话被拒绝</text>
+<rect x="16" y="588" width="1088" height="420" rx="8" fill="rgb(255,255,255)" stroke="rgb(226,221,212)"/>
+<text x="32" y="616" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="16" fill="rgb(31,41,51)" font-weight="700">有硬件 HSM 之后</text>
+<text x="196" y="616" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(92,107,115)">调用不变，明文密钥留在芯片里</text>
+<rect x="44" y="644" width="320" height="84" rx="6" fill="rgb(255,255,255)" stroke="rgb(92,107,115)" stroke-width="1.4"/>
+<text x="204" y="678" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="14" fill="rgb(31,41,51)" text-anchor="middle" font-weight="700">CA 与 Linux 组</text>
+<text x="204" y="704" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(92,107,115)" text-anchor="middle">保持原样</text>
+<rect x="384" y="644" width="336" height="84" rx="6" fill="rgb(255,255,255)" stroke="rgb(92,107,115)" stroke-width="1.4"/>
+<text x="552" y="678" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="14" fill="rgb(31,41,51)" text-anchor="middle" font-weight="700">ta-soa 与 ta-ota</text>
+<text x="552" y="704" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(92,107,115)" text-anchor="middle">命令保持原样</text>
+<rect x="740" y="644" width="332" height="84" rx="6" fill="rgb(255,255,255)" stroke="rgb(92,107,115)" stroke-width="1.4"/>
+<text x="906" y="678" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="14" fill="rgb(31,41,51)" text-anchor="middle" font-weight="700">OTP 与主机私钥</text>
+<text x="906" y="704" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(92,107,115)" text-anchor="middle">保持原样</text>
+<line x1="552" y1="728" x2="552" y2="768" stroke="rgb(194,65,12)" stroke-width="1.6"/>
+<polygon points="552,780 548,768 556,768" fill="rgb(194,65,12)"/>
+<text x="564" y="760" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(194,65,12)">同一组调用</text>
+<rect x="280" y="788" width="560" height="140" rx="6" fill="rgb(255,237,213)" stroke="rgb(194,65,12)" stroke-width="2.4"/>
+<text x="560" y="820" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="15" fill="rgb(194,65,12)" text-anchor="middle" font-weight="700">硬件 HSM</text>
+<text x="560" y="848" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(31,41,51)" text-anchor="middle">fortress-soa、fortress-root、fortress-image</text>
+<text x="560" y="872" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(31,41,51)" text-anchor="middle">AES-128-GCM 和 P-256 验签</text>
+<text x="560" y="900" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(194,65,12)" text-anchor="middle">明文密钥留在芯片里</text>
+<text x="32" y="972" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(92,107,115)">芯片只有 SHE 槽、安全世界里没有 PKCS#11 时，TA 里改两步：P-256 验签和 AES-128-GCM。</text>
+</svg>

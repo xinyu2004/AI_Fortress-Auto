@@ -4,7 +4,7 @@
 
 # AI Fortress Auto
 
-This is a portable OP-TEE handbook for automotive information security, and a QEMU guest that runs SecOC and OTA security before a board is available. On this image the TA uses the OP-TEE crypto API. A later board changes the library path to a vendor PKCS#11 module. Those steps are in [docs/en/switch-pkcs11.md](docs/en/switch-pkcs11.md).
+This is a portable OP-TEE handbook for automotive information security, and a QEMU guest that runs SecOC and OTA security before a board is available. On this image AES-128-GCM and P-256 verify run in the OP-TEE PKCS#11 TA. The description is in [docs/en/hsm.md](docs/en/hsm.md).
 
 After reading this you should be able to say how each boot stage passes, what happens when one download chunk is bad, which checks must all hold before min SVN is written, where KVN and min SVN are kept, and which key is used for each operation.
 
@@ -72,7 +72,7 @@ On an eMMC board the rootfs can include the `mmc` command from mmc-utils (`BR2_P
 
 ### `/data/tee`, and neither store
 
-**`/data/tee`.** This is the encrypted store for TEE objects that must still be there after reboot, including the SecOC AES key. It exists when `CFG_REE_FS=y`. The file key comes from the HUK, so Linux cannot read the plaintext. A file that has been altered is rejected by the TEE. It does not stop rollback. Root can delete the directory, and an older copy of the whole directory still verifies. If KVN and min SVN live only here, deleting the directory makes ta-ota create the factory state again, KVN 1 and min SVN 1, and the service continues on the old version. `CFG_REE_FS=n` leaves no directory.
+**`/data/tee`.** This is the encrypted store for TEE objects that must still be there after reboot. On this image it holds `fortress.ota` (KVN, min SVN, the public-key bytes, and the root hash) and the PKCS#11 token's own storage file. The SecOC AES key is the non-extractable object `fortress-soa` inside that token. The directory exists when `CFG_REE_FS=y`. The file key comes from the HUK, so Linux cannot read the plaintext. A file that has been altered is rejected by the TEE. It does not stop rollback. Root can delete the directory, and an older copy of the whole directory still verifies. If KVN and min SVN live only here, deleting the directory makes ta-ota create the factory state again, KVN 1 and min SVN 1, and the service continues on the old version. `CFG_REE_FS=n` leaves no directory.
 
 **Neither.** The board has no RPMB write counter and no `/data/tee`. Nothing on the device remembers that a higher KVN or a higher min SVN was accepted, so an older image public key and an older package can be accepted again. A key left in an ordinary file can be read and modified, and after reboot the TEE has no protected copy. On that board, OTA anti-rollback and protected key storage are both absent.
 
@@ -99,7 +99,7 @@ The header is signed by the current image private key. It carries the total leng
 
 ## 6. How each key is used
 
-Secret-key plaintext stays inside the HSM. The secure world keeps the handle. A public key can be read back.
+On this image the SecOC secret key is an object in the OP-TEE PKCS#11 TA. ta-soa keeps a handle for the call. A public key can be read back, and ta-ota also keeps those bytes for the root-hash check. Linux groups are unchanged. The split is in [docs/en/hsm.md](docs/en/hsm.md).
 
 
 | Key                | Where it lives                                                                                          | What it is used for                                                          |
@@ -107,12 +107,12 @@ Secret-key plaintext stays inside the HSM. The secure world keeps the handle. A 
 | Boot public key    | The hash is in OTP eFuse. The public key is in the boot certificate.                    | Checks BL2, then BL31, then OP-TEE and U-Boot. On the secure QEMU image, U-Boot also checks the kernel and ramdisk in `fit.itb`. |
 | HUK                | Another field in the same OTP eFuse.                                                                    | Derives the RPMB HMAC key, and the `/data/tee` key when `CFG_REE_FS=y`.     |
 | RPMB HMAC key      | Derived in the TEE from the HUK and written once at customer end of line. The eMMC or UFS vendor does not ship it. | Authenticates each frame of the RPMB region.                                 |
-| Root public key    | The private key stays offline. The hash is a different OTP field from the boot public key.             | Verifies a Key Manifest.                                                     |
-| Image public key   | In the HSM. The version is KVN, stored in RPMB or on another monotonic anchor.                         | Verifies the image header, each chunk, and the unlock signature.            |
-| SecOC AES key      | An HSM handle. AES-128-GCM.                                                                             | Encrypts a frame after the freshness check. Freshness stays in ta-soa.      |
+| Root public key    | The private key stays offline. The hash is a different OTP field from the boot public key. Verify uses the PKCS#11 object `fortress-root`. ta-ota keeps the bytes for the hash check. | Verifies a Key Manifest. |
+| Image public key   | Verify uses the PKCS#11 object `fortress-image`. KVN stays in ta-ota. | Verifies the image header, each chunk, and the unlock signature. |
+| SecOC AES key      | Non-extractable object `fortress-soa` in the PKCS#11 TA. AES-128-GCM. The 16 bytes are not kept in ta-soa. | Encrypts a frame after the freshness check. Freshness stays in ta-soa. |
 
 
-Switching to a real device changes the library path. The steps are in [docs/en/switch-pkcs11.md](docs/en/switch-pkcs11.md). How the HSM and the TEE split the work is in [docs/en/hsm.md](docs/en/hsm.md).
+How the TA reaches the token is in [docs/en/switch-pkcs11.md](docs/en/switch-pkcs11.md).
 
 ## 7. Who may open a TA
 

@@ -37,7 +37,7 @@ eMMC 板上，Buildroot 可以装上 mmc-utils 的 `mmc`（`BR2_PACKAGE_MMC_UTIL
 
 ## `/data/tee`，以及两者都没有
 
-**`/data/tee`。** 这是 TEE 对象的加密存储，用来把重启后还要用的数据留下来，包括 SecOC 的 AES 密钥。`CFG_REE_FS=y` 时才有这个目录。文件密钥由 HUK 推出，Linux 读不出明文。改过的文件，TEE 不接受。它不防回滚。root 可以删掉目录，把整个目录换回更早的一份，校验仍然通过。KVN 和 min SVN 如果只放在这里，删掉目录后 ta-ota 会再次建出厂状态，KVN 1、min SVN 1，服务继续，版本已经回去了。`CFG_REE_FS=n` 时没有这个目录。
+**`/data/tee`。** 这是 TEE 对象的加密存储，用来把重启后还要用的数据留下来。这张镜像上，这里放着 `fortress.ota`（KVN、min SVN、公钥字节和根哈希），以及 PKCS#11 令牌自己的存储文件。SecOC 的 AES 密钥是这个令牌里不可导出的对象 `fortress-soa`。`CFG_REE_FS=y` 时才有这个目录。文件密钥由 HUK 推出，Linux 读不出明文。改过的文件，TEE 不接受。它不防回滚。root 可以删掉目录，把整个目录换回更早的一份，校验仍然通过。KVN 和 min SVN 如果只放在这里，删掉目录后 ta-ota 会再次建出厂状态，KVN 1、min SVN 1，服务继续，版本已经回去了。`CFG_REE_FS=n` 时没有这个目录。
 
 **两者都没有。** 板上没有 RPMB 的写计数，也没有 `/data/tee`。设备不记得曾经接受过更高的 KVN 或更高的 min SVN，旧的二级公钥和旧包可以再被接受。密钥若落在普通文件里，可以被读走、改掉，重启之后 TEE 也没有受保护的那一份。在这块板上，OTA 防回滚和受保护的密钥存储都不成立。
 

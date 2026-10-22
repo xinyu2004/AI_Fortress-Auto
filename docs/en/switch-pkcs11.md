@@ -1,25 +1,23 @@
 [English](switch-pkcs11.md) | [Chinese](../zh/switch-pkcs11.md)
 
-# Switching to a vendor PKCS#11 library
+# Wiring the PKCS#11 token
 
-The application commands do not change. Edit `config/hsm.env`:
+The application commands do not change. A CA still opens ta-ota or ta-soa. It does not open the token.
 
-- `PKCS11_MODULE`: absolute path of the vendor `.so`
-- `PKCS11_SLOT`: the slot number shown by `-L` below
-- `PKCS11_TOKEN_LABEL` and `PKCS11_PIN`: used to open the token
+On this QEMU image the token is the OP-TEE PKCS#11 TA. ta-ota and ta-soa call it from the secure world. They do not call `TEE_ALG_AES_GCM` or `TEE_ALG_ECDSA_P256`. `config/hsm.env` is not read. The split is in [hsm.md](hsm.md).
 
-Reopen the CA sessions, then run `scripts/check_pkcs11.sh`.
+The client code lives next to the two TAs. It opens one session, initializes the token on first use, logs in, and then creates or replaces objects by label. The 16-byte AES key is wiped from the TA stack after the object is created. ta-soa no longer stores that key in the `fortress.soa` persistent object. ta-ota keeps KVN, min SVN, and the root public-key hash in `fortress.ota`.
 
-Tool reference: [pkcs11-tool manual](https://man.archlinux.org/man/pkcs11-tool.1.en). A real device listing can be compared with [YubiHSM 2](https://docs.yubico.com/hardware/yubihsm-2/hsm-2-user-guide/hsm2-opensc-pkcs11.html). That library is `yubihsm_pkcs11.so`. After login you should see slot 0 and the token name `YubiHSM`.
+The guest rootfs must contain `fd02c9da-306c-48c7-a49c-bbd827ae86ee.ta`.
+
+`libckteec.so` stays a normal-world tool. `scripts/check_pkcs11.sh` and `pkcs11-tool` use it to look at a token. A normal-world `pkcs11-tool` session is refused. The SecOC and OTA runs are the check that the token works.
 
 ```bash
 pkcs11-tool --module <so> -I
 pkcs11-tool --module <so> -L
 pkcs11-tool --module <so> -M
-pkcs11-tool --module <so> --slot <slot> --login --pin <PIN> -O
-pkcs11-tool --module <so> --slot <slot> --login --pin <PIN> --generate-random 16
 ```
 
-`-M` must include ECDSA-SHA256 and AES-GCM. In `-O`, a secret key should appear as a non-extractable object.
+`-M` must include ECDSA and AES-GCM. This listing is how a board token is inspected. It is not the path ta-soa uses.
 
-A chip that only has SHE key slots, and no PKCS#11 shared library, cannot be attached by changing the path. That hardware needs a HAL adapter for verify, AES-GCM, random numbers, and the monotonic counter.
+A later board that has a PKCS#11 token inside the secure world keeps these TA calls and changes the token. A chip that only has SHE key slots, and no secure-world PKCS#11 token, needs a HAL with two operations: P-256 verify and AES-128-GCM. The TA still decides KVN, min SVN, the chunk index, and freshness.

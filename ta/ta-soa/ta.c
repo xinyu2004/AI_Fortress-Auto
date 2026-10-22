@@ -1,4 +1,5 @@
 #include "group_id.h"
+#include "pkcs11_client.h"
 #include "wire.h"
 
 #include <fortress/ta_ids.h>
@@ -9,7 +10,6 @@
 
 #define FRESH_SLOTS 16
 #define FRESH_WINDOW 8u
-#define KEY_ID "fortress.soa"
 
 struct fresh_slot {
 	uint16_t service_id;
@@ -19,42 +19,7 @@ struct fresh_slot {
 };
 
 static struct fresh_slot fresh[FRESH_SLOTS];
-static uint8_t soa_key[16];
 static int key_ready;
-
-static TEE_Result load_key(void)
-{
-	TEE_ObjectHandle obj = TEE_HANDLE_NULL;
-	size_t count = 0;
-	TEE_Result rc;
-
-	rc = TEE_OpenPersistentObject(TEE_STORAGE_PRIVATE, KEY_ID, sizeof(KEY_ID),
-				      TEE_DATA_FLAG_ACCESS_READ, &obj);
-	if (rc != TEE_SUCCESS)
-		return rc;
-	rc = TEE_ReadObjectData(obj, soa_key, sizeof(soa_key), &count);
-	TEE_CloseObject(obj);
-	if (rc != TEE_SUCCESS || count != sizeof(soa_key))
-		return TEE_ERROR_BAD_STATE;
-	key_ready = 1;
-	return TEE_SUCCESS;
-}
-
-static TEE_Result store_key(void)
-{
-	TEE_ObjectHandle obj = TEE_HANDLE_NULL;
-	TEE_Result rc;
-
-	rc = TEE_CreatePersistentObject(TEE_STORAGE_PRIVATE, KEY_ID, sizeof(KEY_ID),
-					TEE_DATA_FLAG_ACCESS_WRITE | TEE_DATA_FLAG_OVERWRITE,
-					TEE_HANDLE_NULL, soa_key, sizeof(soa_key), &obj);
-	if (rc != TEE_SUCCESS)
-		return rc;
-	TEE_CloseObject(obj);
-	key_ready = 1;
-	TEE_MemFill(fresh, 0, sizeof(fresh));
-	return TEE_SUCCESS;
-}
 
 static struct fresh_slot *slot_for(uint16_t service_id, int create)
 {
@@ -92,52 +57,28 @@ static void iv_from(uint16_t service_id, uint16_t method_id, uint32_t freshness,
 static TEE_Result gcm_crypt(int encrypt, const uint8_t iv[12], const uint8_t *aad,
 			    const uint8_t *in, uint32_t in_len, uint8_t *out, uint8_t tag[16])
 {
-	TEE_ObjectHandle key = TEE_HANDLE_NULL;
-	TEE_OperationHandle op = TEE_HANDLE_NULL;
-	TEE_Attribute attr;
-	TEE_Result rc;
-	size_t out_len = in_len;
-	size_t tag_len = 16;
-
-	rc = TEE_AllocateTransientObject(TEE_TYPE_AES, 128, &key);
-	if (rc != TEE_SUCCESS)
-		return rc;
-	TEE_InitRefAttribute(&attr, TEE_ATTR_SECRET_VALUE, soa_key, sizeof(soa_key));
-	rc = TEE_PopulateTransientObject(key, &attr, 1);
-	if (rc != TEE_SUCCESS)
-		goto out;
-	rc = TEE_AllocateOperation(&op, TEE_ALG_AES_GCM,
-				   encrypt ? TEE_MODE_ENCRYPT : TEE_MODE_DECRYPT, 128);
-	if (rc != TEE_SUCCESS)
-		goto out;
-	rc = TEE_SetOperationKey(op, key);
-	if (rc != TEE_SUCCESS)
-		goto out;
-	rc = TEE_AEInit(op, iv, 12, 16 * 8, 0, 0);
-	if (rc != TEE_SUCCESS)
-		goto out;
-	TEE_AEUpdateAAD(op, aad, 10);
-	if (encrypt)
-		rc = TEE_AEEncryptFinal(op, in, in_len, out, &out_len, tag, &tag_len);
-	else
-		rc = TEE_AEDecryptFinal(op, in, in_len, out, &out_len, tag, tag_len);
-out:
-	if (op != TEE_HANDLE_NULL)
-		TEE_FreeOperation(op);
-	TEE_FreeTransientObject(key);
-	return rc;
+	return fortress_pkcs11_aes_gcm(encrypt, iv, aad, in, in_len, out, tag);
 }
 
 static TEE_Result cmd_install(uint32_t pt, TEE_Param params[4])
 {
+	uint8_t key[16];
+	TEE_Result rc;
+
 	if (!fortress_client_is_gid(FORTRESS_GID_OTA))
 		return TEE_ERROR_ACCESS_DENIED;
 	if (TEE_PARAM_TYPE_GET(pt, 0) != TEE_PARAM_TYPE_MEMREF_INPUT)
 		return TEE_ERROR_BAD_PARAMETERS;
-	if (params[0].memref.size != sizeof(soa_key))
+	if (params[0].memref.size != sizeof(key))
 		return TEE_ERROR_BAD_PARAMETERS;
-	TEE_MemMove(soa_key, params[0].memref.buffer, sizeof(soa_key));
-	return store_key();
+	TEE_MemMove(key, params[0].memref.buffer, sizeof(key));
+	rc = fortress_pkcs11_import_aes(key);
+	TEE_MemFill(key, 0, sizeof(key));
+	if (rc != TEE_SUCCESS)
+		return rc;
+	key_ready = 1;
+	TEE_MemFill(fresh, 0, sizeof(fresh));
+	return TEE_SUCCESS;
 }
 
 static TEE_Result cmd_seal(uint32_t pt, TEE_Param params[4])
@@ -280,7 +221,8 @@ static TEE_Result cmd_open(uint32_t pt, TEE_Param params[4])
 
 TEE_Result TA_CreateEntryPoint(void)
 {
-	load_key();
+	if (fortress_pkcs11_has_aes())
+		key_ready = 1;
 	return TEE_SUCCESS;
 }
 

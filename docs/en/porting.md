@@ -7,8 +7,8 @@ Do not copy the CAs, TAs, or `protocol/` per chip. Copy `scripts/aarch64/platfor
 1. Confirm the chip is a Cortex-A with TrustZone. Cortex-M and TriCore do not run this OP-TEE tree. They can still reuse the messages and the PKCS#11 side.
 2. Fill in the UART, clock, GIC, core count, secure-DRAM base and size, and the `reserved-memory` and `optee` nodes in the device tree. This QEMU image does not read those values.
 3. Add `scripts/build_<board>.sh`. Change only `CROSS_COMPILE` and the OP-TEE `PLATFORM`. The compile steps match `scripts/aarch64/build.sh`. Do not make that script download sources on its own.
-4. State whether the monotonic counters use real RPMB or a file backend.
-5. Point `PKCS11_MODULE` in `config/hsm.env` at the board library and run `scripts/check_pkcs11.sh`.
+4. KVN and min SVN stay in the TA persistent object. This tree does not use RPMB.
+5. A board token replaces the OP-TEE PKCS#11 TA. The TA calls stay the same. The steps are in [switch-pkcs11.md](switch-pkcs11.md).
 6. In the factory state, `boot/provision_boot_key.sh --pubkey rot_key.pub.pem` burns the boot public-key hash. A second run is refused until `burned` is set back to `0`. The QEMU steps are in [trusted-board-boot.md](trusted-board-boot.md).
 7. Acceptance is still boot verification, chunked download, KVN/SVN, and perception/planning messages. Command numbers stay the same.
 

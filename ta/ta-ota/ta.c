@@ -1,4 +1,5 @@
 #include "group_id.h"
+#include "pkcs11_client.h"
 #include "trust_init.h"
 #include "wire.h"
 
@@ -54,41 +55,35 @@ static TEE_Result sha256(const void *data, size_t len, uint8_t out[32])
 	return rc;
 }
 
+static TEE_Result publish_keys(void)
+{
+	TEE_Result rc;
+
+	rc = fortress_pkcs11_import_p256(FORTRESS_P11_ROOT, trust.root_pk);
+	if (rc != TEE_SUCCESS)
+		return rc;
+	return fortress_pkcs11_import_p256(FORTRESS_P11_IMAGE, trust.image_pk);
+}
+
 static TEE_Result p256_verify(const uint8_t pk[FORTRESS_PK_LEN], const void *msg,
 			      size_t msg_len, const uint8_t sig[FORTRESS_SIG_LEN])
 {
-	TEE_Attribute attr[3];
-	TEE_ObjectHandle key = TEE_HANDLE_NULL;
-	TEE_OperationHandle op = TEE_HANDLE_NULL;
+	const char *label;
 	uint8_t dig[32];
 	TEE_Result rc;
 
 	if (pk[0] != 0x04)
 		return TEE_ERROR_BAD_PARAMETERS;
+	if (TEE_MemCompare(pk, trust.root_pk, FORTRESS_PK_LEN) == 0)
+		label = FORTRESS_P11_ROOT;
+	else if (TEE_MemCompare(pk, trust.image_pk, FORTRESS_PK_LEN) == 0)
+		label = FORTRESS_P11_IMAGE;
+	else
+		return TEE_ERROR_BAD_PARAMETERS;
 	rc = sha256(msg, msg_len, dig);
 	if (rc != TEE_SUCCESS)
 		return rc;
-	TEE_InitRefAttribute(&attr[0], TEE_ATTR_ECC_PUBLIC_VALUE_X, (void *)(pk + 1), 32);
-	TEE_InitRefAttribute(&attr[1], TEE_ATTR_ECC_PUBLIC_VALUE_Y, (void *)(pk + 33), 32);
-	TEE_InitValueAttribute(&attr[2], TEE_ATTR_ECC_CURVE, TEE_ECC_CURVE_NIST_P256, 0);
-	rc = TEE_AllocateTransientObject(TEE_TYPE_ECDSA_PUBLIC_KEY, 256, &key);
-	if (rc != TEE_SUCCESS)
-		return rc;
-	rc = TEE_PopulateTransientObject(key, attr, 3);
-	if (rc != TEE_SUCCESS)
-		goto out;
-	rc = TEE_AllocateOperation(&op, TEE_ALG_ECDSA_P256, TEE_MODE_VERIFY, 256);
-	if (rc != TEE_SUCCESS)
-		goto out;
-	rc = TEE_SetOperationKey(op, key);
-	if (rc != TEE_SUCCESS)
-		goto out;
-	rc = TEE_AsymmetricVerifyDigest(op, NULL, 0, dig, sizeof(dig), sig, FORTRESS_SIG_LEN);
-out:
-	if (op != TEE_HANDLE_NULL)
-		TEE_FreeOperation(op);
-	TEE_FreeTransientObject(key);
-	return rc;
+	return fortress_pkcs11_verify_p256(label, dig, sig);
 }
 
 static TEE_Result save_trust(void)
@@ -119,7 +114,7 @@ static TEE_Result load_trust(void)
 		TEE_CloseObject(obj);
 		if (rc != TEE_SUCCESS || count != sizeof(trust))
 			return TEE_ERROR_BAD_STATE;
-		return TEE_SUCCESS;
+		return publish_keys();
 	}
 	TEE_MemFill(&trust, 0, sizeof(trust));
 	trust.kvn = TRUST_INIT_KVN;
@@ -133,7 +128,10 @@ static TEE_Result load_trust(void)
 	if (TEE_MemCompare(hash, trust.root_hash, FORTRESS_HASH_LEN) != 0)
 		return TEE_ERROR_SECURITY;
 	IMSG("factory state created, KVN %u min SVN %u", trust.kvn, trust.min_svn);
-	return save_trust();
+	rc = save_trust();
+	if (rc != TEE_SUCCESS)
+		return rc;
+	return publish_keys();
 }
 
 static void clear_download(void)
@@ -205,6 +203,9 @@ static TEE_Result cmd_manifest(uint32_t pt, TEE_Param params[4])
 		IMSG("manifest KVN %u is not greater than %u", kvn, trust.kvn);
 		return TEE_ERROR_SECURITY;
 	}
+	rc = fortress_pkcs11_import_p256(FORTRESS_P11_IMAGE, m + 20);
+	if (rc != TEE_SUCCESS)
+		return rc;
 	TEE_MemMove(trust.image_pk, m + 20, FORTRESS_PK_LEN);
 	trust.kvn = kvn;
 	rc = save_trust();

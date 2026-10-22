@@ -2,7 +2,7 @@
 
 # AI Fortress Auto
 
-这是一份可移植的 OP-TEE 车载信息安全手册，也是一块在有板子之前就能跑 SecOC 和 OTA security 的 QEMU 客户机。这张镜像里 TA 使用 OP-TEE 的密码接口。以后换到板子上，再把库路径改到厂商的 PKCS#11 模块。步骤在 [docs/zh/switch-pkcs11.md](docs/zh/switch-pkcs11.md)。
+这是一份可移植的 OP-TEE 车载信息安全手册，也是一块在有板子之前就能跑 SecOC 和 OTA security 的 QEMU 客户机。这张镜像上，AES-128-GCM 和 P-256 验签在 OP-TEE 的 PKCS#11 TA 里执行。说明在 [docs/zh/hsm.md](docs/zh/hsm.md)。
 
 读完应能说出：启动每一级怎样才算通过、下载时一块坏了会怎样、刷写完成后哪几项同时成立才写 min SVN、KVN 和 min SVN 记在哪里、每把密钥用在哪一次运算上。
 
@@ -68,7 +68,7 @@ eMMC 板上，rootfs 可以带上 mmc-utils 的 `mmc` 命令（`BR2_PACKAGE_MMC_
 
 ### `/data/tee`，以及两者都没有
 
-**`/data/tee`。** 这是 TEE 对象的加密存储，用来把重启后还要用的数据留下来，包括 SecOC 的 AES 密钥。`CFG_REE_FS=y` 时才有这个目录。文件密钥由 HUK 推出，Linux 读不出明文。改过的文件，TEE 不接受。它不防回滚。root 可以删掉目录，把整个目录换回更早的一份，校验仍然通过。KVN 和 min SVN 如果只放在这里，删掉目录后 ta-ota 会再次建出厂状态，KVN 1、min SVN 1，服务继续，版本已经回去了。`CFG_REE_FS=n` 时没有这个目录。
+**`/data/tee`。** 这是 TEE 对象的加密存储，用来把重启后还要用的数据留下来。这张镜像上，这里放着 `fortress.ota`（KVN、min SVN、公钥字节和根哈希），以及 PKCS#11 令牌自己的存储文件。SecOC 的 AES 密钥是这个令牌里不可导出的对象 `fortress-soa`。`CFG_REE_FS=y` 时才有这个目录。文件密钥由 HUK 推出，Linux 读不出明文。改过的文件，TEE 不接受。它不防回滚。root 可以删掉目录，把整个目录换回更早的一份，校验仍然通过。KVN 和 min SVN 如果只放在这里，删掉目录后 ta-ota 会再次建出厂状态，KVN 1、min SVN 1，服务继续，版本已经回去了。`CFG_REE_FS=n` 时没有这个目录。
 
 **两者都没有。** 板上没有 RPMB 的写计数，也没有 `/data/tee`。设备不记得曾经接受过更高的 KVN 或更高的 min SVN，旧的二级公钥和旧包可以再被接受。密钥若落在普通文件里，可以被读走、改掉，重启之后 TEE 也没有受保护的那一份。在这块板上，OTA 防回滚和受保护的密钥存储都不成立。
 
@@ -95,18 +95,18 @@ eMMC 板上，rootfs 可以带上 mmc-utils 的 `mmc` 命令（`BR2_PACKAGE_MMC_
 
 ## 6. 密钥怎么被用
 
-对称密钥的明文留在 HSM 里。安全世界保存句柄。公钥可以读出来核对。
+这张镜像里，SecOC 的秘密密钥是 OP-TEE PKCS#11 TA 里的对象。ta-soa 调用时拿句柄。公钥可以读出来核对，ta-ota 也留着这些字节，用来核对根哈希。Linux 组不因此改变。分工在 [docs/zh/hsm.md](docs/zh/hsm.md)。
 
 | 密钥 | 放在哪里 | 用来做什么 |
 | --- | --- | --- |
 | 启动公钥 | 哈希在 OTP eFuse。公钥在启动证书里。 | 核对 BL2，然后 BL31，然后 OP-TEE 和 U-Boot。安全启动的这张 QEMU 镜像上，U-Boot 再核对 `fit.itb` 里的内核和 ramdisk。 |
 | HUK | 同一块 OTP eFuse 里的另一段。 | 推出 RPMB 的 HMAC 密钥；`CFG_REE_FS=y` 时也推出 `/data/tee` 的密钥。 |
 | RPMB HMAC 密钥 | 在 TEE 里由 HUK 推出，客户下线写入一次。颗粒厂不带这把密钥。 | 给 RPMB 的每一帧做认证。 |
-| 根公钥 | 私钥留在线外。哈希在 OTP 的另一段，和启动公钥不是同一段。 | 验 Key Manifest。 |
-| 二级公钥 | 在 HSM 里。版本号是 KVN，记在 RPMB 或另一个只增不减的锚上。 | 验镜像头、每一块，以及解锁时的签名。 |
-| SecOC AES 密钥 | HSM 里的句柄。AES-128-GCM。 | 新鲜度通过之后加密一帧。新鲜度本身留在 ta-soa。 |
+| 根公钥 | 私钥留在线外。哈希在 OTP 的另一段，和启动公钥不是同一段。验签用 PKCS#11 对象 `fortress-root`。ta-ota 留着公钥字节，用来核对这份哈希。 | 验 Key Manifest。 |
+| 二级公钥 | 验签用 PKCS#11 对象 `fortress-image`。KVN 留在 ta-ota。 | 验镜像头、每一块，以及解锁时的签名。 |
+| SecOC AES 密钥 | PKCS#11 TA 里不可导出的对象 `fortress-soa`。AES-128-GCM。这 16 字节不留在 ta-soa。 | 新鲜度通过之后加密一帧。新鲜度本身留在 ta-soa。 |
 
-换到真设备时改的是库路径，步骤在 [docs/zh/switch-pkcs11.md](docs/zh/switch-pkcs11.md)。HSM 和 TEE 怎么分工见 [docs/zh/hsm.md](docs/zh/hsm.md)。
+TA 怎么接到令牌，见 [docs/zh/switch-pkcs11.md](docs/zh/switch-pkcs11.md)。
 
 ## 7. 谁可以打开 TA
 

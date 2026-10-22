@@ -30,6 +30,7 @@ make -C "$ROOT/ta/ta-soa" TA_DEV_KIT_DIR="$KIT" CROSS_COMPILE="$CROSS" clean
 make -C "$ROOT/ta/ta-ota" TA_DEV_KIT_DIR="$KIT" CROSS_COMPILE="$CROSS" clean
 make -C "$ROOT/ta/ta-soa" TA_DEV_KIT_DIR="$KIT" CROSS_COMPILE="$CROSS"
 make -C "$ROOT/ta/ta-ota" TA_DEV_KIT_DIR="$KIT" CROSS_COMPILE="$CROSS"
+PKCS11_TA=$(bash "$ROOT/scripts/rebuild_pkcs11_ta.sh" aarch32)
 
 "$HOST_GCC" -Wall -Wextra -Werror \
 	-I"$ROOT/ca" -I"$ROOT/ta/common" -I"$ROOT/protocol/include" \
@@ -43,11 +44,12 @@ make -C "$ROOT/ta/ta-ota" TA_DEV_KIT_DIR="$KIT" CROSS_COMPILE="$CROSS"
 
 WORK=$(mktemp -d)
 cp -L "$CPIO" "$WORK/rootfs.cpio.gz"
-"$FAKEROOT" -- bash -s "$WORK" "$ROOT" "$FIX" <<'EOF'
+"$FAKEROOT" -- bash -s "$WORK" "$ROOT" "$FIX" "$PKCS11_TA" <<'EOF'
 set -euo pipefail
 work="$1"
 root="$2"
 fix="$3"
+pkcs11="$4"
 unpack="$work/unpack"
 mkdir -p "$unpack"
 gzip -dc "$work/rootfs.cpio.gz" | (cd "$unpack" && cpio -idm)
@@ -88,7 +90,7 @@ chmod 0755 "$unpack/etc/init.d/S50udhcpc"
 install -d -m 0755 "$unpack/etc/fortress"
 install -m 0644 "$fix/manifest.bin" "$fix/image.hdr" "$fix/image_old.hdr" "$fix/payload.bin" \
 	"$fix/soa.key" "$unpack/etc/fortress/"
-install -m 0444 "$root/ta/ta-ota/"*.ta "$root/ta/ta-soa/"*.ta "$unpack/lib/optee_armtz/"
+install -m 0444 "$root/ta/ta-ota/"*.ta "$root/ta/ta-soa/"*.ta "$pkcs11" "$unpack/lib/optee_armtz/"
 grep -q '^fortress-ota:' "$unpack/etc/group" || echo 'fortress-ota:x:2000:ca-ota' >>"$unpack/etc/group"
 grep -q '^fortress-perception:' "$unpack/etc/group" || echo 'fortress-perception:x:2001:perception' >>"$unpack/etc/group"
 grep -q '^fortress-planning:' "$unpack/etc/group" || echo 'fortress-planning:x:2002:planning' >>"$unpack/etc/group"
