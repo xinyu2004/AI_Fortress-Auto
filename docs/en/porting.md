@@ -9,7 +9,7 @@ Do not copy the CAs, TAs, or `protocol/` per chip. Copy `scripts/aarch64/platfor
 3. Add `scripts/build_<board>.sh`. Change only `CROSS_COMPILE` and the OP-TEE `PLATFORM`. The compile steps match `scripts/aarch64/build.sh`. Do not make that script download sources on its own.
 4. State whether the monotonic counters use real RPMB or a file backend.
 5. Point `PKCS11_MODULE` in `config/hsm.env` at the board library and run `scripts/check_pkcs11.sh`.
-6. In the factory state, `boot/provision_boot_key.sh --pubkey customer.pem` writes the root public-key hash. `boot/lock_boot_key.sh` locks it. After the lock, the script must refuse another write.
+6. In the factory state, `boot/provision_boot_key.sh --pubkey rot_key.pub.pem` burns the boot public-key hash. A second run is refused until `burned` is set back to `0`. The QEMU steps are in [trusted-board-boot.md](trusted-board-boot.md).
 7. Acceptance is still boot verification, chunked download, KVN/SVN, and perception/planning messages. Command numbers stay the same.
 
 The tags in `versions.env` are the clone targets. A new board does not change them unless a board patch needs another OP-TEE version.

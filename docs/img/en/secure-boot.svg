@@ -32,8 +32,8 @@
 <text x="36" y="222" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" font-weight="700" fill="rgb(194,65,12)">Provision</text>
 <line x1="50" y1="256" x2="991" y2="256" stroke="rgb(194,65,12)" stroke-width="1.6"/>
 <polygon points="1000,256 991,252 991,260" fill="rgb(194,65,12)"/>
-<text x="520.5" y="246" text-anchor="middle" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13"><tspan fill="rgb(194,65,12)">burn </tspan><tspan fill="rgb(190,24,93)" font-weight="700">public key</tspan><tspan fill="rgb(194,65,12)"> into eFuse</tspan></text>
-<text x="36" y="284" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)">ROM code reads this field. CLOSED refuses another write.</text>
+<text x="520.5" y="246" text-anchor="middle" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13"><tspan fill="rgb(194,65,12)">burn </tspan><tspan fill="rgb(190,24,93)" font-weight="700">hash(public key)</tspan><tspan fill="rgb(194,65,12)"> into eFuse</tspan></text>
+<text x="36" y="284" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)">ROM code compares this hash. burned=1 refuses another write.</text>
 <line x1="998" y1="318" x2="789" y2="318" stroke="rgb(194,65,12)" stroke-width="1.6"/>
 <polygon points="780,318 789,314 789,322" fill="rgb(194,65,12)"/>
 <text x="893.5" y="308" text-anchor="middle" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13"><tspan fill="rgb(194,65,12)">burn </tspan><tspan fill="rgb(190,24,93)" font-weight="700">hash(public key)</tspan><tspan fill="rgb(194,65,12)"> into HSM</tspan></text>

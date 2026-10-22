@@ -25,7 +25,6 @@ if [[ ! -d "$ROOT/dep-src/optee_os/.git" ]]; then
 fi
 
 make -C "$ROOT/protocol" test
-make -C "$ROOT/boot"
 
 echo "Build OP-TEE OS ($OPTEE_PLATFORM) -> $OS_OUT"
 make -C "$ROOT/dep-src/optee_os" \

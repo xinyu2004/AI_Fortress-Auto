@@ -12,17 +12,17 @@ After reading this you should be able to say how each boot stage passes, what ha
 
 ![Overview](docs/img/en/overview.svg)
 
-Boot is the next section. This figure is SecOC and OTA security. The boot public key sits in OTP eFuse, and the hash of that key sits in the HSM. The application root public key is a different key: only its hash is in OTP. RPMB holds KVN and min SVN, and those two numbers only increase. SecOC freshness stays in ta-soa for this power cycle.
+Boot is the next section. This figure is SecOC and OTA security. OTP eFuse holds the hash of the boot public key. The public key itself is in the boot certificate. The application root public key is a different key: only its hash is in OTP. RPMB holds KVN and min SVN, and those two numbers only increase. SecOC freshness stays in ta-soa for this power cycle.
 
 ## 2. Secure boot sequence
 
 ![Secure boot](docs/img/en/secure-boot.svg)
 
-There is no client application in this chain. One boot public key is burned once. The public key goes into OTP eFuse. ROM code reads that field, and after CLOSED the field cannot be written again. The hash of that public key is burned into the HSM.
+There is no client application in this chain. One boot public key is burned once. OTP eFuse holds the hash of that public key. The public key itself is in the boot certificate. ROM code compares the hash, and `burned=1` refuses another write.
 
-The same public key then checks the image that is about to run: BL2, then BL31, then OP-TEE and Linux. A match runs that image. A mismatch stops.
+On a board, the same public key then checks the image that is about to run: BL2, then BL31, then OP-TEE and Linux. A match runs that image. A mismatch stops.
 
-While the lifecycle is open, `boot/provision_boot_key.sh --pubkey customer.pem` writes the SHA-256 of the customer's uncompressed public key into `boot/otp.state`. After `boot/lock_boot_key.sh`, the same write fails. This file is the QEMU stand-in for that hash. TF-A Trusted Board Boot on QEMU follows the same rule. This repository can already execute the open and locked checks. It has not yet baked that hash into a TF-A image that has been booted here.
+The plain `build_qemu.sh` does not check this key. `build_qemu.sh secure` checks BL2, then BL31, then OP-TEE and U-Boot. That U-Boot then checks the kernel and ramdisk in `fit.itb`. The plain image boots the same FIT and does not require the signature. The hash burned into BL1 is the stand-in for the eFuse field. How to build both images is in [docs/en/trusted-board-boot.md](docs/en/trusted-board-boot.md).
 
 ## 3. SecOC
 
@@ -39,40 +39,42 @@ How to compile and open the guest is in [How to run it](#8-how-to-run-it). SecOC
 
 ## 4. RPMB, KVN, and SVN
 
-![eMMC](docs/img/en/emmc.svg)
+### KVN and min SVN
 
-The decision is a version check. RPMB stores the two numbers it compares: KVN and min SVN. `0x31 F000` sends a Key Manifest that already contains the new image public key and its KVN. The root public key verifies that manifest. The manifest KVN must be greater than the stored KVN before the public key is replaced and the new KVN is written. `0x31 F002` sends no version. The image header already carries KVN and SVN. Activation writes min SVN only when the package verifies, the header KVN equals the stored KVN, and the header SVN is at least min SVN. `0x27` checks the unlock signature with the public key of the stored KVN. Rewriting the User Data Area does not change either stored number. The HMAC key, written once at customer end of line, and the write counter keep those numbers from moving backward.
+**KVN**, Key Version Number, is the version of the current image public key. A replacement key must be greater, so an older public key cannot return.
 
-![UFS](docs/img/en/ufs.svg)
-
-UFS uses the same two comparisons. KVN and min SVN sit in one RPMB region, the well-known logical unit `0xC4`. UFS 2.2 and UFS 3.1 allow up to four regions, each with its own HMAC key and its own write counter. `bBootLunEn` only selects which boot LUN runs. `mmc` does not open this unit.
-
-![RPMB](docs/img/en/rpmb.svg)
-
-RPMB, Replay Protected Memory Block, is the region drawn above. That device checks every frame. The non-secure world can carry a frame, and it cannot change the values stored in the region.
-
-The authentication key is a separate 256-bit HMAC key. The eMMC or UFS vendor does not program it. The customer line does, once. ta-ota reads the HUK from OTP eFuse, derives this key, and writes it. That frame crosses as `OPTEE_RPC_CMD_RPMB` to `tee-supplicant`, which hands the same frame to the driver of the RPMB region. ca-ota is not on this step. The device does not read the key back out. The other copy stays in the TEE.
-
-KVN and min SVN use the same two hops. ca-ota calls ta-ota to update the image public key or to activate, and the call stops there. ta-ota builds the frame: an address, the data, the write counter inside the device, and an HMAC-SHA256. `tee-supplicant` is a normal-world daemon, not a CA. It only carries the frame. Without the key it cannot produce an HMAC the partition accepts, so the write is rejected. A replay of an old frame is rejected too, because the write counter has already moved forward. The counter increases only after a write succeeds, and nothing outside the device can decrease it.
-
-**KVN**, Key Version Number, is the version of the current image public key. A replacement key must be greater, so an older public key cannot return. An old Linux disk image does not decrease KVN or min SVN.
-
-**SVN**, Security Version Number, is the security version of an image. min SVN is the lowest version that may still be activated, which blocks rolling the image back.
-
+**SVN**, Security Version Number, is the security version of an image. min SVN is the lowest version that may still be activated.
 
 | Value   | When it changes                                                          | If the check fails, or power is lost before the write |
 | ------- | ------------------------------------------------------------------------ | ----------------------------------------------------- |
 | KVN     | The root public key accepts a new image public key with a higher version | Keep the old public key and the old KVN               |
 | min SVN | The whole package verifies and activation writes the package SVN         | Keep the old minimum security version                 |
 
+`0x31 F000` sends a Key Manifest that already contains the new image public key and its KVN. The root public key verifies that manifest. The manifest KVN must be greater than the stored KVN before the public key is replaced and the new KVN is written. `0x31 F002` sends no version. The image header already carries KVN and SVN. Activation writes min SVN only when the package verifies, the header KVN equals the stored KVN, and the header SVN is at least min SVN. `0x27` checks the unlock signature with the public key of the stored KVN.
 
-**When the device has this partition**
+![eMMC](docs/img/en/emmc.svg)
 
-The TEE writes the authentication key at customer end of line. If the normal world programs it first, the TEE cannot use the partition afterwards. On an eMMC board the rootfs can include the `mmc` command from mmc-utils (`BR2_PACKAGE_MMC_UTILS=y`). That command sends MMC ioctls from Linux. It can read the write counter, and it can program the HMAC key. tee-supplicant does not link it. ta-ota still passes the frame as `OPTEE_RPC_CMD_RPMB` to the kernel driver. UFS RPMB is not reached with `mmc`. If the device does not accept a later write of KVN or min SVN, those two values stay unchanged, and they are not copied into a normal file.
+The right side of the figure is that check. The left side is the partition that holds the two numbers.
 
-**When the device has no RPMB**
+### RPMB
 
-`/data/tee` is present only when OP-TEE is built with `CFG_REE_FS=y`. That option selects the REE filesystem backend, and `tee-supplicant` then stores the objects in this directory. `CFG_REE_FS=n` leaves no `/data/tee`. The files are encrypted with a key from the HUK, and a changed file is detected. Replacing the whole directory with an older copy still verifies, so this store does not block rollback. KVN and min SVN then use another anchor that only increases: a monotonic counter in the SoC, or an NV counter in the HSM. min SVN can also be burned into OTP fuse bits. Those bits are few, and they only record the floor. When no such anchor is available, the two values are not treated as written.
+RPMB, Replay Protected Memory Block, is that partition. The device checks every frame. Linux can carry a frame and cannot change the stored values.
+
+The authentication key is a separate 256-bit HMAC key. The eMMC or UFS vendor does not program it. The customer line does, once, derived from the HUK. ta-ota writes it. That frame crosses as `OPTEE_RPC_CMD_RPMB` to `tee-supplicant`, which only carries the frame to the driver. ca-ota is not on this step. The device does not read the key back. If the normal world writes the HMAC key first, the TEE cannot use the partition afterwards, and the board has no counter for KVN and min SVN.
+
+ca-ota calls ta-ota to update the image public key or to activate, and the call stops there. ta-ota builds the frame: an address, the data, the write counter inside the device, and an HMAC-SHA256. Without the key the partition rejects the write. A replay of an old frame is rejected too, because the write counter increases only after a write succeeds. Rewriting the User Data Area does not change either stored number. A rejected write leaves both numbers unchanged.
+
+UFS uses the same two comparisons. KVN and min SVN sit in one RPMB region, the well-known logical unit `0xC4`. UFS 2.2 and UFS 3.1 allow up to four regions, each with its own HMAC key and its own write counter. `bBootLunEn` only selects which boot LUN runs. `mmc` does not open this unit.
+
+On an eMMC board the rootfs can include the `mmc` command from mmc-utils (`BR2_PACKAGE_MMC_UTILS=y`). That command sends MMC ioctls from Linux. It can read the write counter, and it can program the HMAC key. tee-supplicant does not link it. ta-ota still passes the frame to the kernel driver.
+
+![RPMB](docs/img/en/rpmb.svg)
+
+### `/data/tee`, and neither store
+
+**`/data/tee`.** This is the encrypted store for TEE objects that must still be there after reboot, including the SecOC AES key. It exists when `CFG_REE_FS=y`. The file key comes from the HUK, so Linux cannot read the plaintext. A file that has been altered is rejected by the TEE. It does not stop rollback. Root can delete the directory, and an older copy of the whole directory still verifies. If KVN and min SVN live only here, deleting the directory makes ta-ota create the factory state again, KVN 1 and min SVN 1, and the service continues on the old version. `CFG_REE_FS=n` leaves no directory.
+
+**Neither.** The board has no RPMB write counter and no `/data/tee`. Nothing on the device remembers that a higher KVN or a higher min SVN was accepted, so an older image public key and an older package can be accepted again. A key left in an ordinary file can be read and modified, and after reboot the TEE has no protected copy. On that board, OTA anti-rollback and protected key storage are both absent.
 
 This QEMU virt machine has no eMMC and no UFS device, so `mmc` has nothing to open. The image still selects mmc-utils for a later eMMC board. KVN and min SVN on this image stay in the REE filesystem. Each boot starts again at KVN 1 and min SVN 1. The guest does not check a device write counter.
 
@@ -102,7 +104,7 @@ Secret-key plaintext stays inside the HSM. The secure world keeps the handle. A 
 
 | Key                | Where it lives                                                                                          | What it is used for                                                          |
 | ------------------ | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| Boot public key    | The key is in OTP eFuse. Its hash is in the HSM.                                                        | Checks BL2, then BL31, then OP-TEE and Linux.                                |
+| Boot public key    | The hash is in OTP eFuse. The public key is in the boot certificate.                    | Checks BL2, then BL31, then OP-TEE and U-Boot. On the secure QEMU image, U-Boot also checks the kernel and ramdisk in `fit.itb`. |
 | HUK                | Another field in the same OTP eFuse.                                                                    | Derives the RPMB HMAC key, and the `/data/tee` key when `CFG_REE_FS=y`.     |
 | RPMB HMAC key      | Derived in the TEE from the HUK and written once at customer end of line. The eMMC or UFS vendor does not ship it. | Authenticates each frame of the RPMB region.                                 |
 | Root public key    | The private key stays offline. The hash is a different OTP field from the boot public key.             | Verifies a Key Manifest.                                                     |
@@ -130,7 +132,7 @@ scripts/aarch64/prepare_env.sh
 scripts/aarch64/build_qemu.sh
 ```
 
-`prepare_sources.sh` clones the trees pinned in `versions.env`. `prepare_env.sh` checks for `bison`, `flex`, and `dtc`. A missing package makes it print the install command and exit. `build_qemu.sh` does not install packages and does not compile QEMU itself. It builds TF-A, U-Boot, OP-TEE, Linux, and Buildroot, then `install_guest.sh` packs ta-ota, ta-soa, perception, planning, and ca-ota into the rootfs. The boot files are in `dep-src/out/aarch64`. If `bl1.bin`, `Image`, or `rootfs.cpio.gz` is missing, `run_SecOC.sh` and `run_OTA.sh` print the missing names and exit.
+`prepare_sources.sh` clones the trees pinned in `versions.env`, including mbed TLS. `prepare_env.sh` checks for `bison`, `flex`, and `dtc`. A missing package makes it print the install command and exit. `build_qemu.sh` does not install packages and does not compile QEMU itself. It builds TF-A, U-Boot, OP-TEE, Linux, and Buildroot, then `install_guest.sh` packs ta-ota, ta-soa, perception, planning, and ca-ota into the rootfs. The boot files are in `dep-src/out/aarch64`. If `bl1.bin`, `Image`, or `rootfs.cpio.gz` is missing, `run_SecOC.sh` and `run_OTA.sh` print the missing names and exit. This build leaves the boot check off. After that image exists, `build_qemu.sh secure` checks BL2, BL31, OP-TEE, and U-Boot, and that U-Boot checks the kernel and ramdisk in `fit.itb`. The plain image boots the same FIT. The steps are in [docs/en/trusted-board-boot.md](docs/en/trusted-board-boot.md).
 
 `scripts/aarch64/build.sh` builds OP-TEE OS, optee_client, and the host tests. It does not build the bootable image.
 
@@ -155,7 +157,7 @@ scripts/aarch64/run_tee.sh
 
 After Linux boots, ca-ota installs the AES key into ta-soa. perception and planning then exchange a new plaintext every 100 ms.
 
-The 32-bit pair is `scripts/aarch32/run_SecOC.sh` and `scripts/aarch32/run_tee.sh`.
+The 32-bit pair is `scripts/aarch32/run_SecOC.sh` and `scripts/aarch32/run_tee.sh`. Add `secure` to boot the checked image: `scripts/aarch64/run_SecOC.sh secure`.
 
 ### Run OTA
 
@@ -177,5 +179,6 @@ To move onto your own board, follow [docs/en/porting.md](docs/en/porting.md) and
 - Porting: [docs/en/porting.md](docs/en/porting.md)
 - Switching the PKCS#11 library: [docs/en/switch-pkcs11.md](docs/en/switch-pkcs11.md)
 - QEMU image, first stage: [docs/en/build-qemu.md](docs/en/build-qemu.md)
+- Trusted Board Boot on this QEMU: [docs/en/trusted-board-boot.md](docs/en/trusted-board-boot.md)
 - Who may open a TA: [docs/en/session-login.md](docs/en/session-login.md)
 

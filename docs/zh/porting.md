@@ -9,7 +9,7 @@ CA、TA 和 `protocol/` 不要按芯片复制。复制 `scripts/aarch64/platform
 3. 增加 `scripts/build_<板名>.sh`。只改 `CROSS_COMPILE` 和 OP-TEE 的 `PLATFORM`，编译步骤与 `scripts/aarch64/build.sh` 相同。不要在这个脚本里自动下载源码。
 4. 写明单调计数器接真 RPMB，还是暂时用文件。
 5. 把 `config/hsm.env` 的 `PKCS11_MODULE` 换成板上的库，跑 `scripts/check_pkcs11.sh`。
-6. 工厂态用 `boot/provision_boot_key.sh --pubkey customer.pem` 写入根公钥哈希，再用 `boot/lock_boot_key.sh` 锁定。锁定后脚本必须拒绝再写。
+6. 工厂态用 `boot/provision_boot_key.sh --pubkey rot_key.pub.pem` 烧写启动公钥哈希。`burned=1` 后拒绝再写。要模拟一颗新芯片，把 `burned` 手工改回 `0`。QEMU 上的步骤见 [trusted-board-boot.md](../en/trusted-board-boot.md)。
 7. 验收仍是启动校验、分块下载、KVN/SVN 和感知与规控通信，命令号不变。
 
 `versions.env` 里的 tag 是 clone 目标。换板不改这些 tag，除非板级补丁要求另一版 OP-TEE。

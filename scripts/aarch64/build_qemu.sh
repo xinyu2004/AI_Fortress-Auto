@@ -6,6 +6,11 @@ set -euo pipefail
 
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 SRC="$ROOT/dep-src"
+MODE="${1:-}"
+if [[ -n "$MODE" && "$MODE" != "secure" ]]; then
+	echo "usage: scripts/aarch64/build_qemu.sh [secure]"
+	exit 1
+fi
 
 need() {
 	if [[ ! -d "$SRC/$1/.git" ]]; then
@@ -180,16 +185,23 @@ pin_optee_demo() {
 	if [[ -f "$mk" ]] && ! grep -q CFG_ENABLE_EMBEDDED_TESTS "$mk"; then
 		sed -i '/^OPTEE_OS_COMMON_FLAGS += DEBUG=/a OPTEE_OS_COMMON_FLAGS += CFG_ENABLE_EMBEDDED_TESTS=n CFG_TEE_CORE_LOG_LEVEL=2' "$mk"
 	fi
-	if [[ -f "$conf" ]] && ! grep -q 'fortress.entry' "$conf"; then
+	if [[ -f "$conf" ]] && ! grep -q 'fit.itb' "$conf"; then
 		python3 - "$conf" <<'PY'
-import pathlib, sys
+import pathlib, re, sys
 path = pathlib.Path(sys.argv[1])
-old = "load hostfs - ${ramdisk_addr_r} rootfs.cpio.uboot &&  setenv bootargs console=ttyAMA0,115200 earlyprintk=serial,ttyAMA0,115200 root=/dev/ram && bootm"
-new = "load hostfs - ${ramdisk_addr_r} rootfs.cpio.uboot && load hostfs - 0x40100000 fortress.entry && env import -t 0x40100000 \\${filesize} && setenv bootargs console=ttyAMA0,115200 earlyprintk=serial,ttyAMA0,115200 root=/dev/ram fortress.entry=\\${fortress_entry} && bootm"
+boot = (
+    'CONFIG_BOOTCOMMAND="setenv kernel_addr_r 0x42200000 && '
+    'load hostfs - 0x50000000 fit.itb && '
+    'load hostfs - 0x40100000 fortress.entry && '
+    'env import -t 0x40100000 \\${filesize} && '
+    'setenv bootargs console=ttyAMA0,115200 earlyprintk=serial,ttyAMA0,115200 root=/dev/ram fortress.entry=\\${fortress_entry} && '
+    'bootm 0x50000000#conf"'
+)
 text = path.read_text()
-if old not in text:
+text2, n = re.subn(r'^CONFIG_BOOTCOMMAND=.*$', boot, text, count=1, flags=re.M)
+if n != 1:
     raise SystemExit("u-boot bootcmd fragment no longer matches")
-path.write_text(text.replace(old, new, 1))
+path.write_text(text2)
 PY
 	fi
 }
@@ -223,6 +235,70 @@ if [[ -d "$openssl_modules" ]]; then
 	export OPENSSL_MODULES="$openssl_modules"
 fi
 
+# shellcheck disable=SC1091
+source "$ROOT/scripts/fit_image.sh"
+
+if [[ "$MODE" == "secure" ]]; then
+	# shellcheck disable=SC1091
+	source "$ROOT/boot/efuse.sh"
+	priv="$SRC/boot-keys/rot_key.pem"
+	efuse=$(efuse_path "$ROOT")
+	if [[ ! -d "$SRC/mbedtls/.git" ]]; then
+		echo "dep-src/mbedtls is missing. Run scripts/prepare_sources.sh"
+		exit 1
+	fi
+	if [[ ! -f "$priv" ]]; then
+		echo "Missing $priv"
+		echo "openssl genrsa -out $priv 2048"
+		echo "openssl rsa -in $priv -pubout -out $SRC/boot-keys/rot_key.pub.pem"
+		echo "boot/provision_boot_key.sh --pubkey $SRC/boot-keys/rot_key.pub.pem"
+		exit 1
+	fi
+	if [[ ! -f "$SRC/out/aarch64/bl1.bin" ]]; then
+		echo "Build the plain image first: scripts/aarch64/build_qemu.sh"
+		exit 1
+	fi
+	efuse_read "$efuse"
+	want=$(rotpk_hash_pem "$priv")
+	if [[ "$EFUSE_BURNED" != "1" || -z "$EFUSE_HASH" || "$EFUSE_HASH" != "$want" ]]; then
+		echo "boot/otp.efuse must be burned=1 and match $priv"
+		echo "boot/provision_boot_key.sh --pubkey $SRC/boot-keys/rot_key.pub.pem"
+		exit 1
+	fi
+	flags=()
+	arg=
+	for arg in "${MAKE_FLAGS[@]}"; do
+		[[ "$arg" == TF_A_TRUSTED_BOARD_BOOT=* ]] && continue
+		flags+=("$arg")
+	done
+	echo "Sign fit.itb and build the U-Boot that requires that signature"
+	fit_sign aarch64 "$SRC/out/aarch64" "$priv"
+	secure_uboot="$SRC/out/aarch64/u-boot-secure/u-boot.bin"
+	echo "Build TF-A with TRUSTED_BOARD_BOOT=1 and GENERATE_COT=1"
+	make "${flags[@]}" TF_A_TRUSTED_BOARD_BOOT=y \
+		BUILD_PLAT="$SRC/out/aarch64/tf-a-secure" \
+		ROT_KEY="$priv" \
+		BL33_BIN="$secure_uboot" \
+		arm-tf
+	ln -sfn "$SRC/u-boot/u-boot.bin" "$SRC/out/aarch64/bl33.bin"
+	mkdir -p "$SRC/out/aarch64/secure"
+	cp -a "$SRC/out/aarch64/tf-a-secure/bl1.bin" "$SRC/out/aarch64/tf-a-secure/fip.bin" \
+		"$SRC/out/aarch64/secure/"
+	# qemu_v8.mk links certificates from the plain TF-A directory. The secure
+	# certificates are in tf-a-secure, so those links do not resolve. Drop them.
+	for name in trusted_key.crt tos_fw_key.crt tos_fw_content.crt tb_fw.crt \
+		soc_fw_key.crt soc_fw_content.crt nt_fw_key.crt nt_fw_content.crt; do
+		link="$SRC/out/aarch64/$name"
+		if [[ -L "$link" && ! -e "$link" ]]; then
+			rm -f "$link"
+		fi
+	done
+	echo "Secure boot files are in dep-src/out/aarch64/secure."
+	echo "This image checks BL2, BL31, OP-TEE, U-Boot, and the kernel and ramdisk in fit.itb."
+	echo "Linux console: scripts/aarch64/run_SecOC.sh secure or scripts/aarch64/run_OTA.sh secure"
+	exit 0
+fi
+
 echo "Download the ARM GNU toolchain used by OP-TEE 4.10.0 into dep-src/toolchains"
 make "${MAKE_FLAGS[@]}" aarch64-toolchain aarch32-toolchain
 
@@ -232,6 +308,7 @@ make "${MAKE_FLAGS[@]}" -j"$(nproc)" linux buildroot arm-tf uImage uRootfs
 mkdir -p "$SRC/out/aarch64"
 ln -sfn "$SRC/out/aarch64/out-br/images/rootfs.cpio.gz" "$SRC/out/aarch64/rootfs.cpio.gz"
 "$ROOT/scripts/aarch64/install_guest.sh"
+fit_pack aarch64 "$SRC/out/aarch64"
 
 echo "Image is in dep-src/out/aarch64 (bl1.bin, Image, rootfs.cpio.gz)."
 echo "TF-A TRUSTED_BOARD_BOOT is off, so this image does not check the boot public key."

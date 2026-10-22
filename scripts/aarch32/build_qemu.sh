@@ -8,6 +8,11 @@ set -euo pipefail
 
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 SRC="$ROOT/dep-src"
+MODE="${1:-}"
+if [[ -n "$MODE" && "$MODE" != "secure" ]]; then
+	echo "usage: scripts/aarch32/build_qemu.sh [secure]"
+	exit 1
+fi
 OUT="$SRC/out/aarch32"
 OS_OUT="$OUT/optee_os"
 
@@ -59,6 +64,29 @@ if "BUILD_PLAT=$(TF_A_OUT)" not in text:
     if needle not in text:
         raise SystemExit("qemu.mk: PLAT=qemu line not found")
     text = text.replace(needle, needle + "\tBUILD_PLAT=$(TF_A_OUT) \\\n", 1)
+old_tbb = "TF_A_FLAGS += MBEDTLS_DIR=$(ROOT)/mbedtls TRUSTED_BOARD_BOOT=1 GENERATE_COT=1\n"
+new_tbb = 'TF_A_FLAGS += MBEDTLS_DIR=$(ROOT)/mbedtls TRUSTED_BOARD_BOOT=1 GENERATE_COT=1 CFLAGS="-U__ARM_NEON -U__ARM_NEON__"\n'
+# The Arm GNU AArch32 compiler defines __ARM_NEON. TF-A compiles with
+# -nostdinc, so mbedtls cannot open arm_neon.h. Leave the intrinsics off.
+if old_tbb in text:
+    text = text.replace(old_tbb, new_tbb, 1)
+elif "TF_A_TRUSTED_BOARD_BOOT" not in text:
+    token = "arm-tf: optee-os u-boot\n"
+    if token not in text:
+        raise SystemExit("qemu.mk: arm-tf target not found")
+    tbb = "ifeq ($(TF_A_TRUSTED_BOARD_BOOT),y)\n" + new_tbb + "endif\n\n"
+    text = text.replace(token, tbb + token, 1)
+if "U-BOOT_BIN ?=" not in text:
+    text = text.replace(
+        "TF_A_FLAGS ?=",
+        "U-BOOT_BIN ?= $(U-BOOT_PATH)/u-boot.bin\n\nTF_A_FLAGS ?=",
+        1,
+    )
+    text = text.replace(
+        "\tBL33=$(U-BOOT_PATH)/u-boot.bin \\\n",
+        "\tBL33=$(U-BOOT_BIN) \\\n",
+        1,
+    )
 path.write_text(text)
 PY
 
@@ -128,11 +156,8 @@ MAKE_FLAGS=(
 
 unset CARGO_TARGET_DIR
 
-echo "Download the ARM GNU toolchain used by OP-TEE 4.10.0 into dep-src/toolchains"
-make "${MAKE_FLAGS[@]}" aarch32-toolchain
-
 # Host mkeficapsule needs gnutls. This image does not use capsules.
-# The boot command also imports fortress.entry so one image can start SecOC or OTA.
+# The boot command loads the same FIT the secure image verifies.
 uboot_frag="$SRC/build/kconfigs/u-boot_qemu_virt_v7.conf"
 python3 - "$uboot_frag" <<'PY'
 import pathlib, sys
@@ -140,14 +165,74 @@ path = pathlib.Path(sys.argv[1])
 text = path.read_text()
 if "CONFIG_TOOLS_MKEFICAPSULE" not in text:
     text += "\n# Host mkeficapsule needs gnutls. This image does not use capsules.\n# CONFIG_TOOLS_MKEFICAPSULE is not set\n"
-old = "load hostfs - ${ramdisk_addr_r} rootfs.cpio.gz && setenv bootargs console=ttyAMA0,115200 earlyprintk=serial,ttyAMA0,115200 && fdt chosen ${ramdisk_addr_r} ${filesize} && bootz ${kernel_addr_r} - ${fdt_addr}"
-new = "load hostfs - ${ramdisk_addr_r} rootfs.cpio.gz && setenv rd_size ${filesize} && load hostfs - 0x40200000 fortress.entry && env import -t 0x40200000 ${filesize} && setenv bootargs console=ttyAMA0,115200 earlyprintk=serial,ttyAMA0,115200 fortress.entry=${fortress_entry} && fdt chosen ${ramdisk_addr_r} ${rd_size} && bootz ${kernel_addr_r} - ${fdt_addr}"
-if "fortress.entry" not in text:
-    if old not in text:
+if "fit.itb" not in text:
+    import re
+    boot = (
+        'CONFIG_BOOTCOMMAND="load hostfs - 0x48000000 fit.itb && '
+        'load hostfs - 0x40200000 fortress.entry && '
+        'env import -t 0x40200000 ${filesize} && '
+        'setenv bootargs console=ttyAMA0,115200 earlyprintk=serial,ttyAMA0,115200 fortress.entry=${fortress_entry} && '
+        'bootm 0x48000000#conf"'
+    )
+    text2, n = re.subn(r'^CONFIG_BOOTCOMMAND=.*$', boot, text, count=1, flags=re.M)
+    if n != 1:
         raise SystemExit("u-boot_qemu_virt_v7.conf boot command no longer matches")
-    text = text.replace(old, new, 1)
+    text = text2
 path.write_text(text)
 PY
+
+# shellcheck disable=SC1091
+source "$ROOT/scripts/fit_image.sh"
+
+if [[ "$MODE" == "secure" ]]; then
+	# shellcheck disable=SC1091
+	source "$ROOT/boot/efuse.sh"
+	priv="$SRC/boot-keys/rot_key.pem"
+	efuse=$(efuse_path "$ROOT")
+	plain=$(readlink -f "$OUT/bl1.bin")
+	if [[ ! -d "$SRC/mbedtls/.git" ]]; then
+		echo "dep-src/mbedtls is missing. Run scripts/prepare_sources.sh"
+		exit 1
+	fi
+	if [[ ! -f "$priv" ]]; then
+		echo "Missing $priv"
+		echo "openssl genrsa -out $priv 2048"
+		echo "openssl rsa -in $priv -pubout -out $SRC/boot-keys/rot_key.pub.pem"
+		echo "boot/provision_boot_key.sh --pubkey $SRC/boot-keys/rot_key.pub.pem"
+		exit 1
+	fi
+	if [[ ! -f "$plain" ]]; then
+		echo "Build the plain image first: scripts/aarch32/build_qemu.sh"
+		exit 1
+	fi
+	efuse_read "$efuse"
+	want=$(rotpk_hash_pem "$priv")
+	if [[ "$EFUSE_BURNED" != "1" || -z "$EFUSE_HASH" || "$EFUSE_HASH" != "$want" ]]; then
+		echo "boot/otp.efuse must be burned=1 and match $priv"
+		echo "boot/provision_boot_key.sh --pubkey $SRC/boot-keys/rot_key.pub.pem"
+		exit 1
+	fi
+	echo "Sign fit.itb and build the U-Boot that requires that signature"
+	fit_sign aarch32 "$OUT" "$priv"
+	echo "Build TF-A with TRUSTED_BOARD_BOOT=1 and GENERATE_COT=1"
+	flags=()
+	for arg in "${MAKE_FLAGS[@]}"; do
+		[[ "$arg" == TF_A_BUILD=* ]] && continue
+		flags+=("$arg")
+	done
+	make "${flags[@]}" TF_A_TRUSTED_BOARD_BOOT=y TF_A_BUILD="$OUT/tf-a-secure" ROT_KEY="$priv" \
+		U-BOOT_BIN="$OUT/u-boot-secure/u-boot.bin" arm-tf
+	mkdir -p "$OUT/secure"
+	cp -a "$OUT/tf-a-secure/release/bl1.bin" "$OUT/tf-a-secure/release/fip.bin" "$OUT/secure/"
+	ln -sfn "$plain" "$OUT/bl1.bin"
+	echo "Secure boot files are in dep-src/out/aarch32/secure."
+	echo "This image checks BL2, BL31, OP-TEE, U-Boot, and the kernel and ramdisk in fit.itb."
+	echo "Linux console: scripts/aarch32/run_SecOC.sh secure or scripts/aarch32/run_OTA.sh secure"
+	exit 0
+fi
+
+echo "Download the ARM GNU toolchain used by OP-TEE 4.10.0 into dep-src/toolchains"
+make "${MAKE_FLAGS[@]}" aarch32-toolchain
 
 echo "Build Linux, Buildroot, U-Boot, OP-TEE, and TF-A"
 rc=1
@@ -165,6 +250,7 @@ fi
 
 ln -sfn "$OUT/out-br/images/rootfs.cpio.gz" "$OUT/rootfs.cpio.gz"
 "$ROOT/scripts/aarch32/install_guest.sh"
+fit_pack aarch32 "$OUT"
 
 echo "Image is in dep-src/out/aarch32 (bl1.bin, zImage, rootfs.cpio.gz)."
 echo "TF-A Trusted Board Boot stays off, so this image does not check the boot public key."

@@ -1,0 +1,6 @@
+# burned=0  The hash can still be written. This is a new chip. build_qemu.sh does not read this file.
+# burned=1  Already burned. provision refuses another write.
+# To simulate a new chip, set burned back to 0 by hand. A real eFuse cannot be cleared.
+# build_qemu.sh secure requires burned=1 and a hash.
+burned=0
+hash=

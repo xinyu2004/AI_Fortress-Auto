@@ -5,6 +5,7 @@ set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 BIN="$ROOT/dep-src/out/aarch32"
 ENTRY="${1:-}"
+BOOT="${2:-}"
 LOCK=/tmp/fortress-aarch32-linux.lock
 ENTRY_FILE=/tmp/fortress-aarch32-linux.entry
 TEE_PORT=54321
@@ -19,10 +20,14 @@ OTA)
 	entry_name=ota
 	;;
 *)
-	echo "usage: scripts/aarch32/run_SecOC.sh | scripts/aarch32/run_OTA.sh"
+	echo "usage: scripts/aarch32/run_SecOC.sh [secure] | scripts/aarch32/run_OTA.sh [secure]"
 	exit 1
 	;;
 esac
+if [[ -n "$BOOT" && "$BOOT" != "secure" ]]; then
+	echo "usage: scripts/aarch32/run_SecOC.sh [secure] | scripts/aarch32/run_OTA.sh [secure]"
+	exit 1
+fi
 
 missing=()
 [[ -f "$BIN/bl1.bin" ]] || missing+=(bl1.bin)
@@ -36,13 +41,23 @@ fi
 
 BL1=$(readlink -f "$BIN/bl1.bin")
 FIP="$(dirname "$BL1")/fip.bin"
-if [[ ! -f "$FIP" ]]; then
-	echo "Boot image is not ready. Missing: $FIP"
-	echo "Build it with: scripts/aarch32/build_qemu.sh"
+FLASH="$BIN/flash.bin"
+if [[ "$BOOT" == "secure" ]]; then
+	BL1="$BIN/secure/bl1.bin"
+	FIP="$BIN/secure/fip.bin"
+	FLASH="$BIN/secure/flash.bin"
+fi
+if [[ ! -f "$BIN/fit.itb" || ! -f "$BL1" || ! -f "$FIP" ]]; then
+	echo "Boot image is not ready. Missing: $BIN/fit.itb or $BL1 or $FIP"
+	if [[ "$BOOT" == "secure" ]]; then
+		echo "Build it with: scripts/aarch32/build_qemu.sh secure"
+	else
+		echo "Build it with: scripts/aarch32/build_qemu.sh"
+	fi
 	exit 1
 fi
 
-python3 - "$BL1" "$FIP" "$BIN/flash.bin" <<'PY'
+python3 - "$BL1" "$FIP" "$FLASH" <<'PY'
 import pathlib, sys
 bl1 = pathlib.Path(sys.argv[1]).read_bytes()
 fip = pathlib.Path(sys.argv[2]).read_bytes()
@@ -86,19 +101,17 @@ echo "${guest_note}"
 echo "Leave this window with Ctrl-a x."
 
 cd "$BIN"
-NET=()
-if [[ "$ENTRY" == "OTA" ]]; then
-	OTA_PORT=$(sed -n 's/^#define FORTRESS_OTA_PORT \([0-9]*\)u/\1/p' "$ROOT/ta/common/wire.h")
-	NET=(
-		-netdev "user,id=net0,hostfwd=tcp:127.0.0.1:${OTA_PORT}-:${OTA_PORT}"
-		-device virtio-net-device,netdev=net0
-	)
-fi
+# The NIC is always present so the signed device tree matches SecOC and OTA.
+OTA_PORT=$(sed -n 's/^#define FORTRESS_OTA_PORT \([0-9]*\)u/\1/p' "$ROOT/ta/common/wire.h")
+NET=(
+	-netdev "user,id=net0,hostfwd=tcp:127.0.0.1:${OTA_PORT}-:${OTA_PORT}"
+	-device virtio-net-device,netdev=net0
+)
 exec qemu-system-arm -display none -smp 2 -m 1057 \
 	-cpu cortex-a15 \
 	-machine virt,secure=on \
 	-semihosting-config enable=on,target=native \
-	-bios flash.bin \
+	-bios "$FLASH" \
 	"${NET[@]}" \
 	-serial mon:stdio \
 	-serial tcp:127.0.0.1:${TEE_PORT},server=on,wait=on

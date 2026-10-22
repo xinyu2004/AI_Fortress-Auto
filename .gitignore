@@ -8,7 +8,6 @@ dep-src/
 rootfs_overlay/mkfixture
 protocol/test_policy
 protocol/libfortress.a
-boot/fortress-tool
 .*.cmd
 .*.d
 ta.lds

@@ -14,8 +14,9 @@
 | linux（linaro-swg/linux） | optee-4.10.0 |
 | buildroot | 2025.05 |
 | u-boot | v2025.07 |
+| mbedtls | v3.6.5 |
 
-原先 `versions.env` 钉的是 TF-A v2.12.0、kernel.org 的 Linux v6.12.49、Buildroot 2025.02.1。这三样不是这份配方在编的组合。
+原先 `versions.env` 钉的是 TF-A v2.12.0、kernel.org 的 Linux v6.12.49、Buildroot 2025.02.1。这三样不是这份配方在编的组合。mbed TLS 只给 `build_qemu.sh secure` 用。普通镜像不链接它。
 
 ```bash
 scripts/prepare_sources.sh
@@ -23,7 +24,7 @@ scripts/aarch64/prepare_env.sh
 scripts/aarch64/build_qemu.sh
 ```
 
-打开镜像的步骤在 README。SecOC 是 `run_SecOC.sh` 加 `run_tee.sh`。OTA 是 `run_OTA.sh` 加 `run_tee.sh`，然后 `scripts/diag_tester.sh`。
+打开镜像的步骤在 README。SecOC 是 `run_SecOC.sh` 加 `run_tee.sh`。OTA 是 `run_OTA.sh` 加 `run_tee.sh`，然后 `scripts/diag_tester.sh`。不带参数的 `build_qemu.sh` 不核对启动公钥，并写出 `fit.itb`。普通镜像编完之后，`build_qemu.sh secure` 核对 BL2、BL31、OP-TEE 和 U-Boot，这份 U-Boot 再核对同一个 `fit.itb` 里的内核和 ramdisk。启动用 `run_SecOC.sh secure` 或 `run_OTA.sh secure`。步骤在 [trusted-board-boot.md](../en/trusted-board-boot.md)。
 
 `prepare_sources.sh` 把源码放到 `dep-src/`。`scripts/aarch64/prepare_env.sh` 检查主机上的 `bison`、`flex` 和 `dtc`，缺了就给出安装命令。`scripts/aarch64/build_qemu.sh` 不再下载这些树，也不装包。它把 OP-TEE 4.10.0 使用的 ARM GNU 工具链下到 `dep-src/toolchains`，再通过 `dep-src/build/qemu_v8.mk` 编译 Linux、Buildroot、U-Boot、OP-TEE 和 TF-A。fTPM 和 Rust 示例关掉。脚本关掉 U-Boot 的主机工具 `mkeficapsule`，所以编译不需要 `gnutls.h`。脚本不编译 QEMU 本体。Buildroot 的工作树在 `dep-src/out/aarch64/out-br`（`extra.conf`、`build`、`host`、`staging`、`target`、`images`）。启动文件仍在 `dep-src/out/aarch64`。AArch32 镜像由 `scripts/aarch32/build_qemu.sh` 编到 `dep-src/out/aarch32`。镜像进入 `dep-src/out/aarch64` 之后，`scripts/aarch64/run_SecOC.sh` 或 `scripts/aarch64/run_OTA.sh` 是 Linux 窗口，一次只跑一个。另一个 SSH 会话跑 `scripts/aarch64/run_tee.sh`，那是 OP-TEE。`bl1.bin`、`Image`、`rootfs.cpio.gz` 还没有时，Linux 脚本打印缺什么和编译命令，然后退出。`scripts/aarch64/install_guest.sh` 把 ta-ota、ta-soa、perception、planning 和 ca-ota 打进这张 rootfs。`run_SecOC.sh` 写入 `fortress.entry=secoc`。Linux 起来后，perception 和 planning 每 100 ms 交换一帧新明文。`run_OTA.sh` 写入 `fortress.entry=ota`，并加上 virtio 网卡，把 TCP 27100 转到主机。ca-ota 等待。`scripts/diag_tester.sh` 先做 `0x27` 解锁，再送入 UDS 成功路径，验签 Key Manifest 和分包。KVN 和 min SVN 经 `tee-supplicant` 存在 REE 文件系统里（`CFG_REE_FS=y`）。这不是 RPMB。Linux 窗口交给 BL1 的 flash 镜像把 `bl1.bin` 放在偏移 0、`fip.bin` 放在 `0x40000`，BL1 从这里装 BL2。U-Boot 仍通过 semihosting 装内核和 rootfs。OTA 在诊断仪触发前保持等待。Linux 窗口到 Buildroot 的登录提示。
 
