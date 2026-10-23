@@ -12,6 +12,10 @@ Do not copy the CAs, TAs, or `protocol/` per chip. Copy `scripts/aarch64/platfor
 6. In the factory state, `boot/provision_boot_key.sh --pubkey rot_key.pub.pem` burns the boot public-key hash. A second run is refused until `burned` is set back to `0`. The QEMU steps are in [trusted-board-boot.md](trusted-board-boot.md).
 7. Acceptance is still boot verification, chunked download, KVN/SVN, and perception/planning messages. Command numbers stay the same.
 
+This is the memory split of the 32-bit QEMU image. Block widths are for reading and are not to scale.
+
+![AArch32 memory](../img/en/mem.svg)
+
 The tags in `versions.env` are the clone targets. A new board does not change them unless a board patch needs another OP-TEE version.
 
 `scripts/prepare_sources.sh` fills `dep-src/` for both architectures. It skips the download when the checkout already matches the pinned commit. Each architecture writes its own tree under `dep-src/out/`.

@@ -1,5 +1,6 @@
 #include "pkcs11_client.h"
 
+#include <stdio.h>
 #include <string.h>
 #include <tee_internal_api.h>
 #include <tee_internal_api_extensions.h>
@@ -100,6 +101,19 @@ struct bytebuf {
 static TEE_TASessionHandle ta_sess;
 static uint32_t ck_sess;
 static int ready;
+
+static void note_ok(const char *cmd, const char *label)
+{
+	if (label)
+		IMSG("pkcs11 %s %s ok", cmd, label);
+	else
+		IMSG("pkcs11 %s ok", cmd);
+}
+
+void fortress_log_gap(void)
+{
+	puts("");
+}
 
 static int put_bytes(struct bytebuf *b, const void *data, uint32_t len)
 {
@@ -217,7 +231,7 @@ static TEE_Result init_token(void)
 	    put_bytes(&ctrl, label, sizeof(label)) ||
 	    put_bytes(&ctrl, SO_PIN, pin_len))
 		return TEE_ERROR_BAD_STATE;
-	return cmd_ctrl(PKCS11_CMD_INIT_TOKEN, "init token", &ctrl);
+	return cmd_ctrl(PKCS11_CMD_INIT_TOKEN, "InitToken", &ctrl);
 }
 
 static TEE_Result open_ck_session(void)
@@ -233,7 +247,7 @@ static TEE_Result open_ck_session(void)
 	ctrl.cap = sizeof(raw);
 	if (put_u32(&ctrl, SLOT_ID) || put_u32(&ctrl, flags))
 		return TEE_ERROR_BAD_STATE;
-	res = cmd_out(PKCS11_CMD_OPEN_SESSION, "open session", &ctrl, &handle, sizeof(handle),
+	res = cmd_out(PKCS11_CMD_OPEN_SESSION, "OpenSession", &ctrl, &handle, sizeof(handle),
 		      NULL);
 	if (res != TEE_SUCCESS)
 		return res;
@@ -253,7 +267,7 @@ static TEE_Result login(uint32_t user, const char *pin)
 	if (put_u32(&ctrl, ck_sess) || put_u32(&ctrl, user) || put_u32(&ctrl, pin_len) ||
 	    put_bytes(&ctrl, pin, pin_len))
 		return TEE_ERROR_BAD_STATE;
-	return cmd_ctrl(PKCS11_CMD_LOGIN, "login", &ctrl);
+	return cmd_ctrl(PKCS11_CMD_LOGIN, "Login", &ctrl);
 }
 
 static TEE_Result logout(void)
@@ -266,7 +280,7 @@ static TEE_Result logout(void)
 	ctrl.cap = sizeof(raw);
 	if (put_u32(&ctrl, ck_sess))
 		return TEE_ERROR_BAD_STATE;
-	return cmd_ctrl(PKCS11_CMD_LOGOUT, "logout", &ctrl);
+	return cmd_ctrl(PKCS11_CMD_LOGOUT, "Logout", &ctrl);
 }
 
 static TEE_Result init_user_pin(void)
@@ -281,7 +295,7 @@ static TEE_Result init_user_pin(void)
 	if (put_u32(&ctrl, ck_sess) || put_u32(&ctrl, pin_len) ||
 	    put_bytes(&ctrl, USER_PIN, pin_len))
 		return TEE_ERROR_BAD_STATE;
-	return cmd_ctrl(PKCS11_CMD_INIT_PIN, "init pin", &ctrl);
+	return cmd_ctrl(PKCS11_CMD_INIT_PIN, "InitPIN", &ctrl);
 }
 
 static TEE_Result ensure(void)
@@ -295,9 +309,10 @@ static TEE_Result ensure(void)
 		return TEE_SUCCESS;
 	res = TEE_OpenTASession(&pkcs11_uuid, TEE_TIMEOUT_INFINITE, types, NULL, &ta_sess, NULL);
 	if (res != TEE_SUCCESS) {
-		IMSG("pkcs11 open session 0x%x", res);
+		IMSG("pkcs11 OpenTA 0x%x", res);
 		return res;
 	}
+	note_ok("OpenTA", NULL);
 	res = token_flags(&flags);
 	if (res != TEE_SUCCESS)
 		goto fail;
@@ -305,6 +320,7 @@ static TEE_Result ensure(void)
 		res = init_token();
 		if (res != TEE_SUCCESS)
 			goto fail;
+		note_ok("InitToken", NULL);
 		res = token_flags(&flags);
 		if (res != TEE_SUCCESS)
 			goto fail;
@@ -312,21 +328,27 @@ static TEE_Result ensure(void)
 	res = open_ck_session();
 	if (res != TEE_SUCCESS)
 		goto fail;
+	note_ok("OpenSession", NULL);
 	if (!(flags & PKCS11_CKFT_USER_PIN_INITIALIZED)) {
 		res = login(PKCS11_CKU_SO, SO_PIN);
 		if (res != TEE_SUCCESS)
 			goto fail;
+		note_ok("Login", "SO");
 		res = init_user_pin();
 		if (res != TEE_SUCCESS)
 			goto fail;
+		note_ok("InitPIN", NULL);
 		res = logout();
 		if (res != TEE_SUCCESS)
 			goto fail;
+		note_ok("Logout", NULL);
 	}
 	res = login(PKCS11_CKU_USER, USER_PIN);
 	if (res != TEE_SUCCESS)
 		goto fail;
+	note_ok("Login", "user");
 	ready = 1;
+	fortress_log_gap();
 	return TEE_SUCCESS;
 fail:
 	TEE_CloseTASession(ta_sess);
@@ -408,7 +430,7 @@ static TEE_Result destroy_handle(uint32_t handle)
 	ctrl.cap = sizeof(raw);
 	if (put_u32(&ctrl, ck_sess) || put_u32(&ctrl, handle))
 		return TEE_ERROR_BAD_STATE;
-	return cmd_ctrl(PKCS11_CMD_DESTROY_OBJECT, "destroy", &ctrl);
+	return cmd_ctrl(PKCS11_CMD_DESTROY_OBJECT, "DestroyObject", &ctrl);
 }
 
 static TEE_Result replace_object(struct bytebuf *body)
@@ -458,22 +480,24 @@ static TEE_Result replace_object(struct bytebuf *body)
 		res = find_label(class_id, name, handles, &count);
 		if (res != TEE_SUCCESS)
 			return res;
+		note_ok("FindObjects", name);
+		for (i = 0; i < count; i++) {
+			res = destroy_handle(handles[i]);
+			if (res != TEE_SUCCESS)
+				return res;
+			note_ok("DestroyObject", name);
+		}
+		ctrl.p = raw;
+		ctrl.n = 0;
+		ctrl.cap = sizeof(raw);
+		if (put_u32(&ctrl, ck_sess) || put_bytes(&ctrl, body->p, body->n))
+			return TEE_ERROR_BAD_STATE;
+		res = cmd_out(PKCS11_CMD_CREATE_OBJECT, "CreateObject", &ctrl, &new_handle,
+			      sizeof(new_handle), NULL);
+		if (res == TEE_SUCCESS)
+			note_ok("CreateObject", name);
+		return res;
 	}
-	for (i = 0; i < count; i++) {
-		res = destroy_handle(handles[i]);
-		if (res != TEE_SUCCESS)
-			return res;
-	}
-	ctrl.p = raw;
-	ctrl.n = 0;
-	ctrl.cap = sizeof(raw);
-	if (put_u32(&ctrl, ck_sess) || put_bytes(&ctrl, body->p, body->n))
-		return TEE_ERROR_BAD_STATE;
-	res = cmd_out(PKCS11_CMD_CREATE_OBJECT, "create", &ctrl, &new_handle, sizeof(new_handle),
-		      NULL);
-	if (res == TEE_SUCCESS)
-		IMSG("pkcs11 object stored");
-	return res;
 }
 
 static int put_bool(struct bytebuf *b, uint32_t id, uint8_t v)
@@ -569,8 +593,10 @@ static TEE_Result object_handle(uint32_t class_id, const char *label, uint32_t *
 	res = find_label(class_id, label, handles, &count);
 	if (res != TEE_SUCCESS)
 		return res;
-	if (count != 1)
+	if (count != 1) {
+		IMSG("pkcs11 FindObjects %s absent", label);
 		return TEE_ERROR_ITEM_NOT_FOUND;
+	}
 	*handle = handles[0];
 	return TEE_SUCCESS;
 }
@@ -634,10 +660,11 @@ TEE_Result fortress_pkcs11_aes_gcm(int encrypt, const uint8_t iv[12], const uint
 		TEE_MemMove(ct + in_len, tag, 16);
 	}
 	res = processing_init(encrypt ? PKCS11_CMD_ENCRYPT_INIT : PKCS11_CMD_DECRYPT_INIT,
-			      encrypt ? "encrypt init" : "decrypt init", handle,
+			      encrypt ? "EncryptInit" : "DecryptInit", handle,
 			      PKCS11_CKM_AES_GCM, mech, sizeof(mech));
 	if (res != TEE_SUCCESS)
 		goto out;
+	note_ok(encrypt ? "EncryptInit" : "DecryptInit", FORTRESS_P11_SOA);
 	ctrl.p = raw;
 	ctrl.n = 0;
 	ctrl.cap = sizeof(raw);
@@ -662,7 +689,7 @@ TEE_Result fortress_pkcs11_aes_gcm(int encrypt, const uint8_t iv[12], const uint
 	types = TEE_PARAM_TYPES(TEE_PARAM_TYPE_MEMREF_INOUT, TEE_PARAM_TYPE_MEMREF_INPUT,
 				TEE_PARAM_TYPE_MEMREF_OUTPUT, TEE_PARAM_TYPE_NONE);
 	res = invoke(encrypt ? PKCS11_CMD_ENCRYPT_ONESHOT : PKCS11_CMD_DECRYPT_ONESHOT,
-		     encrypt ? "encrypt" : "decrypt", types, params);
+		     encrypt ? "Encrypt" : "Decrypt", types, params);
 	got = params[2].memref.size;
 	if (res == TEE_SUCCESS && encrypt) {
 		if (got != in_len + 16)
@@ -677,6 +704,8 @@ TEE_Result fortress_pkcs11_aes_gcm(int encrypt, const uint8_t iv[12], const uint
 		else if (in_len)
 			TEE_MemMove(out, produced, in_len);
 	}
+	if (res == TEE_SUCCESS)
+		note_ok(encrypt ? "Encrypt" : "Decrypt", FORTRESS_P11_SOA);
 out:
 	TEE_Free(ct);
 	TEE_Free(produced);
@@ -699,10 +728,11 @@ TEE_Result fortress_pkcs11_verify_p256(const char *label, const uint8_t digest[3
 	res = object_handle(PKCS11_CKO_PUBLIC_KEY, label, &handle);
 	if (res != TEE_SUCCESS)
 		return res;
-	res = processing_init(PKCS11_CMD_VERIFY_INIT, "verify init", handle, PKCS11_CKM_ECDSA,
+	res = processing_init(PKCS11_CMD_VERIFY_INIT, "VerifyInit", handle, PKCS11_CKM_ECDSA,
 			      NULL, 0);
 	if (res != TEE_SUCCESS)
 		return res;
+	note_ok("VerifyInit", label);
 	ctrl.p = raw;
 	ctrl.n = 0;
 	ctrl.cap = sizeof(raw);
@@ -717,5 +747,8 @@ TEE_Result fortress_pkcs11_verify_p256(const char *label, const uint8_t digest[3
 	params[2].memref.size = 64;
 	types = TEE_PARAM_TYPES(TEE_PARAM_TYPE_MEMREF_INOUT, TEE_PARAM_TYPE_MEMREF_INPUT,
 				TEE_PARAM_TYPE_MEMREF_INPUT, TEE_PARAM_TYPE_NONE);
-	return invoke(PKCS11_CMD_VERIFY_ONESHOT, "verify", types, params);
+	res = invoke(PKCS11_CMD_VERIFY_ONESHOT, "Verify", types, params);
+	if (res == TEE_SUCCESS)
+		note_ok("Verify", label);
+	return res;
 }

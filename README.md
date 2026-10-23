@@ -35,9 +35,9 @@ This is the in-vehicle case that SECOC covers: two directions, a freshness value
 
 How to compile and open the guest is in [How to run it](#8-how-to-run-it). SecOC uses two windows. OTA uses those two, then the diagnostic tester.
 
-
-
 ## 4. RPMB, KVN, and SVN
+
+
 
 ### KVN and min SVN
 
@@ -45,10 +45,12 @@ How to compile and open the guest is in [How to run it](#8-how-to-run-it). SecOC
 
 **SVN**, Security Version Number, is the security version of an image. min SVN is the lowest version that may still be activated.
 
+
 | Value   | When it changes                                                          | If the check fails, or power is lost before the write |
 | ------- | ------------------------------------------------------------------------ | ----------------------------------------------------- |
 | KVN     | The root public key accepts a new image public key with a higher version | Keep the old public key and the old KVN               |
 | min SVN | The whole package verifies and activation writes the package SVN         | Keep the old minimum security version                 |
+
 
 `0x31 F000` sends a Key Manifest that already contains the new image public key and its KVN. The root public key verifies that manifest. The manifest KVN must be greater than the stored KVN before the public key is replaced and the new KVN is written. `0x31 F002` sends no version. The image header already carries KVN and SVN. Activation writes min SVN only when the package verifies, the header KVN equals the stored KVN, and the header SVN is at least min SVN. `0x27` checks the unlock signature with the public key of the stored KVN.
 
@@ -72,7 +74,7 @@ On an eMMC board the rootfs can include the `mmc` command from mmc-utils (`BR2_P
 
 ### `/data/tee`, and neither store
 
-**`/data/tee`.** This is the encrypted store for TEE objects that must still be there after reboot. On this image it holds `fortress.ota` (KVN, min SVN, the public-key bytes, and the root hash) and the PKCS#11 token's own storage file. The SecOC AES key is the non-extractable object `fortress-soa` inside that token. The directory exists when `CFG_REE_FS=y`. The file key comes from the HUK, so Linux cannot read the plaintext. A file that has been altered is rejected by the TEE. It does not stop rollback. Root can delete the directory, and an older copy of the whole directory still verifies. If KVN and min SVN live only here, deleting the directory makes ta-ota create the factory state again, KVN 1 and min SVN 1, and the service continues on the old version. `CFG_REE_FS=n` leaves no directory.
+`/data/tee`**.** This is the encrypted store for TEE objects that must still be there after reboot. On this image it holds `fortress.ota` (KVN, min SVN, the public-key bytes, and the root hash) and the PKCS#11 token's own storage file. The SecOC AES key is the non-extractable object `fortress-soa` inside that token. The directory exists when `CFG_REE_FS=y`. The file key comes from the HUK, so Linux cannot read the plaintext. A file that has been altered is rejected by the TEE. It does not stop rollback. Root can delete the directory, and an older copy of the whole directory still verifies. If KVN and min SVN live only here, deleting the directory makes ta-ota create the factory state again, KVN 1 and min SVN 1, and the service continues on the old version. `CFG_REE_FS=n` leaves no directory.
 
 **Neither.** The board has no RPMB write counter and no `/data/tee`. Nothing on the device remembers that a higher KVN or a higher min SVN was accepted, so an older image public key and an older package can be accepted again. A key left in an ordinary file can be read and modified, and after reboot the TEE has no protected copy. On that board, OTA anti-rollback and protected key storage are both absent.
 
@@ -102,14 +104,14 @@ The header is signed by the current image private key. It carries the total leng
 On this image the SecOC secret key is an object in the OP-TEE PKCS#11 TA. ta-soa keeps a handle for the call. A public key can be read back, and ta-ota also keeps those bytes for the root-hash check. Linux groups are unchanged. The split is in [docs/en/hsm.md](docs/en/hsm.md).
 
 
-| Key                | Where it lives                                                                                          | What it is used for                                                          |
-| ------------------ | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| Boot public key    | The hash is in OTP eFuse. The public key is in the boot certificate.                    | Checks BL2, then BL31, then OP-TEE and U-Boot. On the secure QEMU image, U-Boot also checks the kernel and ramdisk in `fit.itb`. |
-| HUK                | Another field in the same OTP eFuse.                                                                    | Derives the RPMB HMAC key, and the `/data/tee` key when `CFG_REE_FS=y`.     |
-| RPMB HMAC key      | Derived in the TEE from the HUK and written once at customer end of line. The eMMC or UFS vendor does not ship it. | Authenticates each frame of the RPMB region.                                 |
-| Root public key    | The private key stays offline. The hash is a different OTP field from the boot public key. Verify uses the PKCS#11 object `fortress-root`. ta-ota keeps the bytes for the hash check. | Verifies a Key Manifest. |
-| Image public key   | Verify uses the PKCS#11 object `fortress-image`. KVN stays in ta-ota. | Verifies the image header, each chunk, and the unlock signature. |
-| SecOC AES key      | Non-extractable object `fortress-soa` in the PKCS#11 TA. AES-128-GCM. The 16 bytes are not kept in ta-soa. | Encrypts a frame after the freshness check. Freshness stays in ta-soa. |
+| Key              | Where it lives                                                                                                                                                                        | What it is used for                                                                                                              |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Boot public key  | The hash is in OTP eFuse. The public key is in the boot certificate.                                                                                                                  | Checks BL2, then BL31, then OP-TEE and U-Boot. On the secure QEMU image, U-Boot also checks the kernel and ramdisk in `fit.itb`. |
+| HUK              | Another field in the same OTP eFuse.                                                                                                                                                  | Derives the RPMB HMAC key, and the `/data/tee` key when `CFG_REE_FS=y`.                                                          |
+| RPMB HMAC key    | Derived in the TEE from the HUK and written once at customer end of line. The eMMC or UFS vendor does not ship it.                                                                    | Authenticates each frame of the RPMB region.                                                                                     |
+| Root public key  | The private key stays offline. The hash is a different OTP field from the boot public key. Verify uses the PKCS#11 object `fortress-root`. ta-ota keeps the bytes for the hash check. | Verifies a Key Manifest.                                                                                                         |
+| Image public key | Verify uses the PKCS#11 object `fortress-image`. KVN stays in ta-ota.                                                                                                                 | Verifies the image header, each chunk, and the unlock signature.                                                                 |
+| SecOC AES key    | Non-extractable object `fortress-soa` in the PKCS#11 TA. AES-128-GCM. The 16 bytes are not kept in ta-soa.                                                                            | Encrypts a frame after the freshness check. Freshness stays in ta-soa.                                                           |
 
 
 How the TA reaches the token is in [docs/en/switch-pkcs11.md](docs/en/switch-pkcs11.md).
@@ -155,7 +157,9 @@ scripts/aarch64/run_SecOC.sh
 scripts/aarch64/run_tee.sh
 ```
 
-After Linux boots, ca-ota installs the AES key into ta-soa. perception and planning then exchange a new plaintext every 100 ms.
+After Linux boots, ca-ota installs the AES key into ta-soa. perception and planning then exchange a new plaintext every 100 ms. The Linux window shows the exchange. The OP-TEE window shows one seal and one open.
+
+![SecOC](docs/img/Screenshots/SecOC.png)
 
 The 32-bit pair is `scripts/aarch32/run_SecOC.sh` and `scripts/aarch32/run_tee.sh`. Add `secure` to boot the checked image: `scripts/aarch64/run_SecOC.sh secure`.
 
@@ -169,7 +173,11 @@ scripts/aarch64/run_tee.sh
 scripts/diag_tester.sh
 ```
 
-ca-ota waits. The tester unlocks with `0x27`, then sends the manifest, the ordered chunks, verify, and activate. The 32-bit Linux window is `scripts/aarch32/run_OTA.sh` with `scripts/aarch32/run_tee.sh`. The tester command is `scripts/diag_tester.sh aarch32`.
+ca-ota waits. The tester unlocks with `0x27`, then sends the manifest, the ordered chunks, verify, and activate. The three windows are the tester, Linux, and OP-TEE.
+
+![OTA](docs/img/Screenshots/OTA.png)
+
+The 32-bit Linux window is `scripts/aarch32/run_OTA.sh` with `scripts/aarch32/run_tee.sh`. The tester command is `scripts/diag_tester.sh aarch32`.
 
 To move onto your own board, follow [docs/en/porting.md](docs/en/porting.md) and copy `scripts/aarch64/platform.env`. Change `CROSS_COMPILE` and `OPTEE_PLATFORM`. Do not copy the CAs, TAs, or `protocol/`.
 

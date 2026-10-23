@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="724" viewBox="0 0 1120 724">
+<rect width="1120" height="724" fill="rgb(247,245,240)"/>
+<text x="28" y="36" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="18" fill="rgb(31,41,51)">AArch32 memory</text>
+<text x="28" y="58" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(92,107,115)">Widths are for reading, not to scale. Ticks mark the ends of a range.</text>
+<rect x="16" y="76" width="1088" height="268" rx="8" fill="rgb(255,255,255)" stroke="rgb(226,221,212)"/>
+<text x="32" y="108" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="16" fill="rgb(31,41,51)" font-weight="700">Secure RAM, 16 MiB</text>
+<text x="32" y="132" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(92,107,115)">0x0e000000 – 0x0f000000. This range sits outside the 1 GiB below.</text>
+<rect x="40" y="156" width="248" height="100" rx="6" fill="rgb(255,246,238)" stroke="rgb(194,65,12)" stroke-width="1.6"/>
+<text x="164.0" y="188" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="14" fill="rgb(194,65,12)" font-weight="700" text-anchor="middle">Early firmware</text>
+<text x="164.0" y="212" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(31,41,51)" text-anchor="middle">1 MiB</text>
+<text x="164.0" y="234" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)" text-anchor="middle">BL2, BL31</text>
+<rect x="300" y="156" width="300" height="100" rx="6" fill="rgb(209,250,229)" stroke="rgb(4,120,87)" stroke-width="1.6"/>
+<text x="450.0" y="188" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="14" fill="rgb(4,120,87)" font-weight="700" text-anchor="middle">OP-TEE core</text>
+<text x="450.0" y="212" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(31,41,51)" text-anchor="middle">2 MiB</text>
+<text x="450.0" y="234" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)" text-anchor="middle">Code, data, and heap</text>
+<rect x="612" y="156" width="468" height="100" rx="6" fill="rgb(204,251,241)" stroke="rgb(15,110,110)" stroke-width="1.6"/>
+<text x="846.0" y="188" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="14" fill="rgb(15,110,110)" font-weight="700" text-anchor="middle">TAs</text>
+<text x="846.0" y="212" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(31,41,51)" text-anchor="middle">13 MiB</text>
+<text x="846.0" y="234" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)" text-anchor="middle">ta-ota, ta-soa, PKCS#11</text>
+<line x1="40" y1="278" x2="1080" y2="278" stroke="rgb(92,107,115)" stroke-width="1.25"/>
+<line x1="40" y1="271" x2="40" y2="285" stroke="rgb(92,107,115)" stroke-width="1.5"/>
+<text x="40" y="300" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)" text-anchor="start">0x0e000000</text>
+<line x1="294" y1="271" x2="294" y2="285" stroke="rgb(92,107,115)" stroke-width="1.5"/>
+<text x="294" y="300" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)" text-anchor="middle">0x0e100000</text>
+<line x1="606" y1="271" x2="606" y2="285" stroke="rgb(92,107,115)" stroke-width="1.5"/>
+<text x="606" y="300" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)" text-anchor="middle">0x0e300000</text>
+<line x1="1080" y1="271" x2="1080" y2="285" stroke="rgb(92,107,115)" stroke-width="1.5"/>
+<text x="1080" y="300" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)" text-anchor="end">0x0f000000</text>
+<rect x="16" y="360" width="1088" height="344" rx="8" fill="rgb(255,255,255)" stroke="rgb(226,221,212)"/>
+<text x="32" y="392" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="16" fill="rgb(31,41,51)" font-weight="700">Normal DRAM, the first 1 GiB</text>
+<text x="32" y="416" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(92,107,115)">0x40000000 – 0x80000000. QEMU adds 33 MiB past 0x80000000. The drawing stops here.</text>
+<rect x="40" y="440" width="383" height="100" rx="6" fill="rgb(219,234,254)" stroke="rgb(29,78,216)" stroke-width="1.6"/>
+<text x="231.5" y="472" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="14" fill="rgb(29,78,216)" font-weight="700" text-anchor="middle">Kernel</text>
+<text x="231.5" y="496" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(31,41,51)" text-anchor="middle">Loaded at 0x40400000</text>
+<text x="231.5" y="518" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)" text-anchor="middle">Device tree rides in the FIT</text>
+<rect x="435" y="440" width="383" height="100" rx="6" fill="rgb(245,240,252)" stroke="rgb(29,78,216)" stroke-width="1.6"/>
+<text x="626.5" y="472" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="14" fill="rgb(29,78,216)" font-weight="700" text-anchor="middle">Ramdisk</text>
+<text x="626.5" y="496" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(31,41,51)" text-anchor="middle">Loaded at 0x60000000</text>
+<text x="626.5" y="518" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)" text-anchor="middle">Unpacked, this is the rootfs</text>
+<rect x="830" y="440" width="250" height="100" rx="6" fill="rgb(255,237,213)" stroke="rgb(194,65,12)" stroke-width="1.6"/>
+<text x="955.0" y="472" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="14" fill="rgb(194,65,12)" font-weight="700" text-anchor="middle">Shared memory</text>
+<text x="955.0" y="496" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(31,41,51)" text-anchor="middle">2 MiB</text>
+<text x="955.0" y="518" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)" text-anchor="middle">CA and TA parameters</text>
+<line x1="40" y1="562" x2="1080" y2="562" stroke="rgb(92,107,115)" stroke-width="1.25"/>
+<line x1="40" y1="555" x2="40" y2="569" stroke="rgb(92,107,115)" stroke-width="1.5"/>
+<text x="40" y="584" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)" text-anchor="start">0x40000000</text>
+<line x1="429" y1="555" x2="429" y2="569" stroke="rgb(92,107,115)" stroke-width="1.5"/>
+<text x="429" y="584" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)" text-anchor="middle">0x60000000</text>
+<line x1="824" y1="555" x2="824" y2="569" stroke="rgb(92,107,115)" stroke-width="1.5"/>
+<text x="824" y="584" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)" text-anchor="middle">0x7fe00000</text>
+<line x1="1080" y1="555" x2="1080" y2="569" stroke="rgb(92,107,115)" stroke-width="1.5"/>
+<text x="1080" y="584" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="12" fill="rgb(31,41,51)" text-anchor="end">0x80000000</text>
+<text x="40" y="628" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(92,107,115)">Dynamic shared memory borrows pages from these two ranges and has no fixed block.</text>
+<text x="40" y="652" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(92,107,115)">This image is a ramdisk and has no swap partition.</text>
+<text x="40" y="676" font-family="Noto Sans, DejaVu Sans, sans-serif" font-size="13" fill="rgb(92,107,115)">/data/tee is a file on the rootfs, not a physical range.</text>
+</svg>

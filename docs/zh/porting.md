@@ -12,6 +12,10 @@ CA、TA 和 `protocol/` 不要按芯片复制。复制 `scripts/aarch64/platform
 6. 工厂态用 `boot/provision_boot_key.sh --pubkey rot_key.pub.pem` 烧写启动公钥哈希。`burned=1` 后拒绝再写。要模拟一颗新芯片，把 `burned` 手工改回 `0`。QEMU 上的步骤见 [trusted-board-boot.md](../en/trusted-board-boot.md)。
 7. 验收仍是启动校验、分块下载、KVN/SVN 和感知与规控通信，命令号不变。
 
+当前这张 32 位 QEMU 镜像的内存如下。宽度按阅读来，不按比例。
+
+![AArch32 的内存](../img/zh/mem.svg)
+
 `versions.env` 里的 tag 是 clone 目标。换板不改这些 tag，除非板级补丁要求另一版 OP-TEE。
 
 `scripts/prepare_sources.sh` 为两个架构准备同一份 `dep-src/`。提交号已经一致时跳过下载。两个架构各自写入 `dep-src/out/` 下自己的目录。

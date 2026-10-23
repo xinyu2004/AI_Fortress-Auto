@@ -149,7 +149,9 @@ scripts/aarch64/run_SecOC.sh
 scripts/aarch64/run_tee.sh
 ```
 
-Linux 起来后，ca-ota 把 AES 密钥装进 ta-soa。随后 perception 和 planning 每 100 ms 交换一帧新明文。
+Linux 起来后，ca-ota 把 AES 密钥装进 ta-soa。随后 perception 和 planning 每 100 ms 交换一帧新明文。Linux 窗口是交换的报文。OP-TEE 窗口是一次封装和一次打开。
+
+![SecOC](docs/img/Screenshots/SecOC.png)
 
 32 位是 `scripts/aarch32/run_SecOC.sh` 和 `scripts/aarch32/run_tee.sh`。加上 `secure` 启动核对过的镜像：`scripts/aarch64/run_SecOC.sh secure`。
 
@@ -163,7 +165,11 @@ scripts/aarch64/run_tee.sh
 scripts/diag_tester.sh
 ```
 
-ca-ota 会等待。诊断仪先做 `0x27` 解锁，再送清单、顺序分包、验签，然后激活。32 位 Linux 窗口是 `scripts/aarch32/run_OTA.sh`，配 `scripts/aarch32/run_tee.sh`。诊断仪命令是 `scripts/diag_tester.sh aarch32`。
+ca-ota 会等待。诊断仪先做 `0x27` 解锁，再送清单、顺序分包、验签，然后激活。三个窗口分别是诊断仪、Linux 和 OP-TEE。
+
+![OTA](docs/img/Screenshots/OTA.png)
+
+32 位 Linux 窗口是 `scripts/aarch32/run_OTA.sh`，配 `scripts/aarch32/run_tee.sh`。诊断仪命令是 `scripts/diag_tester.sh aarch32`。
 
 换到自己的板子：按 [docs/zh/porting.md](docs/zh/porting.md)，复制 `scripts/aarch64/platform.env`，改 `CROSS_COMPILE` 和 `OPTEE_PLATFORM`。CA、TA 和 `protocol/` 不复制。
 

@@ -114,7 +114,10 @@ static TEE_Result load_trust(void)
 		TEE_CloseObject(obj);
 		if (rc != TEE_SUCCESS || count != sizeof(trust))
 			return TEE_ERROR_BAD_STATE;
-		return publish_keys();
+		rc = publish_keys();
+		if (rc == TEE_SUCCESS)
+			fortress_log_gap();
+		return rc;
 	}
 	TEE_MemFill(&trust, 0, sizeof(trust));
 	trust.kvn = TRUST_INIT_KVN;
@@ -127,11 +130,15 @@ static TEE_Result load_trust(void)
 		return rc;
 	if (TEE_MemCompare(hash, trust.root_hash, FORTRESS_HASH_LEN) != 0)
 		return TEE_ERROR_SECURITY;
-	IMSG("factory state created, KVN %u min SVN %u", trust.kvn, trust.min_svn);
 	rc = save_trust();
 	if (rc != TEE_SUCCESS)
 		return rc;
-	return publish_keys();
+	rc = publish_keys();
+	if (rc != TEE_SUCCESS)
+		return rc;
+	IMSG("factory state created, KVN %u min SVN %u", trust.kvn, trust.min_svn);
+	fortress_log_gap();
+	return TEE_SUCCESS;
 }
 
 static void clear_download(void)
@@ -195,12 +202,14 @@ static TEE_Result cmd_manifest(uint32_t pt, TEE_Param params[4])
 	rc = p256_verify(trust.root_pk, m, FORTRESS_MANIFEST_BODY, m + FORTRESS_MANIFEST_BODY);
 	if (rc != TEE_SUCCESS) {
 		IMSG("manifest signature rejected");
+		fortress_log_gap();
 		return TEE_ERROR_SECURITY;
 	}
 	kvn = (uint32_t)m[8] | ((uint32_t)m[9] << 8) | ((uint32_t)m[10] << 16) |
 	      ((uint32_t)m[11] << 24);
 	if (kvn <= trust.kvn) {
 		IMSG("manifest KVN %u is not greater than %u", kvn, trust.kvn);
+		fortress_log_gap();
 		return TEE_ERROR_SECURITY;
 	}
 	rc = fortress_pkcs11_import_p256(FORTRESS_P11_IMAGE, m + 20);
@@ -213,6 +222,7 @@ static TEE_Result cmd_manifest(uint32_t pt, TEE_Param params[4])
 		return rc;
 	clear_download();
 	IMSG("image public key updated, KVN %u", trust.kvn);
+	fortress_log_gap();
 	return TEE_SUCCESS;
 }
 
@@ -252,15 +262,18 @@ static TEE_Result cmd_begin(uint32_t pt, TEE_Param params[4])
 		return TEE_ERROR_BAD_PARAMETERS;
 	if (kvn != trust.kvn) {
 		IMSG("package KVN %u, current KVN %u", kvn, trust.kvn);
+		fortress_log_gap();
 		return TEE_ERROR_SECURITY;
 	}
 	if (svn < trust.min_svn) {
 		IMSG("package SVN %u is below min SVN %u", svn, trust.min_svn);
+		fortress_log_gap();
 		return TEE_ERROR_SECURITY;
 	}
 	rc = p256_verify(trust.image_pk, header, body, header + body);
 	if (rc != TEE_SUCCESS) {
 		IMSG("package signature rejected");
+		fortress_log_gap();
 		return TEE_ERROR_SECURITY;
 	}
 	clear_download();
@@ -275,6 +288,7 @@ static TEE_Result cmd_begin(uint32_t pt, TEE_Param params[4])
 	begun = 1;
 	verified = 0;
 	IMSG("package accepted SVN %u KVN %u chunks %u", svn, kvn, count);
+	fortress_log_gap();
 	return TEE_SUCCESS;
 }
 
@@ -298,6 +312,7 @@ static TEE_Result cmd_chunk(uint32_t pt, TEE_Param params[4])
 		retransmit = 1;
 	else {
 		IMSG("chunk %u rejected, next is %u", index, next_index);
+		fortress_log_gap();
 		return TEE_ERROR_BAD_PARAMETERS;
 	}
 	if (index >= chunk_count)
@@ -310,15 +325,18 @@ static TEE_Result cmd_chunk(uint32_t pt, TEE_Param params[4])
 		return rc;
 	if (TEE_MemCompare(got, chunk_hash[index], FORTRESS_HASH_LEN) != 0) {
 		IMSG("chunk %u hash mismatch", index);
+		fortress_log_gap();
 		return TEE_ERROR_SECURITY;
 	}
 	if (retransmit) {
 		IMSG("chunk %u retransmit", index);
+		fortress_log_gap();
 		return TEE_SUCCESS;
 	}
 	TEE_DigestUpdate(running, params[1].memref.buffer, params[1].memref.size);
 	next_index++;
 	IMSG("chunk %u ok", index);
+	fortress_log_gap();
 	return TEE_SUCCESS;
 }
 
@@ -337,10 +355,12 @@ static TEE_Result cmd_verify(void)
 		return rc;
 	if (TEE_MemCompare(got, payload_hash, FORTRESS_HASH_LEN) != 0) {
 		IMSG("payload hash mismatch");
+		fortress_log_gap();
 		return TEE_ERROR_SECURITY;
 	}
 	verified = 1;
 	IMSG("package verified");
+	fortress_log_gap();
 	return TEE_SUCCESS;
 }
 
@@ -358,6 +378,7 @@ static TEE_Result cmd_activate(void)
 	if (rc != TEE_SUCCESS)
 		return rc;
 	IMSG("activated, min SVN %u", trust.min_svn);
+	fortress_log_gap();
 	return TEE_SUCCESS;
 }
 
@@ -384,6 +405,7 @@ static TEE_Result cmd_seed(struct ota_sess *s, uint32_t pt, TEE_Param params[4])
 	s->have_seed = 1;
 	s->unlocked = 0;
 	IMSG("seed issued");
+	fortress_log_gap();
 	return TEE_SUCCESS;
 }
 
@@ -400,10 +422,12 @@ static TEE_Result cmd_unlock(struct ota_sess *s, uint32_t pt, TEE_Param params[4
 	rc = p256_verify(trust.image_pk, s->seed, SEED_LEN, params[0].memref.buffer);
 	if (rc != TEE_SUCCESS) {
 		IMSG("security access rejected");
+		fortress_log_gap();
 		return rc;
 	}
 	s->unlocked = 1;
 	IMSG("security access unlocked");
+	fortress_log_gap();
 	return TEE_SUCCESS;
 }
 

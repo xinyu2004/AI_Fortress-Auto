@@ -30,4 +30,7 @@ TEE_Result fortress_pkcs11_aes_gcm(int encrypt, const uint8_t iv[12], const uint
 TEE_Result fortress_pkcs11_verify_p256(const char *label, const uint8_t digest[32],
 				       const uint8_t sig[64]);
 
+/* One blank line after a finished function on the TEE console. */
+void fortress_log_gap(void);
+
 #endif

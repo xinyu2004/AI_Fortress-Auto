@@ -78,6 +78,7 @@ static TEE_Result cmd_install(uint32_t pt, TEE_Param params[4])
 		return rc;
 	key_ready = 1;
 	TEE_MemFill(fresh, 0, sizeof(fresh));
+	fortress_log_gap();
 	return TEE_SUCCESS;
 }
 
@@ -136,11 +137,14 @@ static TEE_Result cmd_seal(uint32_t pt, TEE_Param params[4])
 	out[9] = (uint8_t)(plain_len >> 8);
 	iv_from(sid, mid, next, iv);
 	rc = gcm_crypt(1, iv, out, in + 6, plain_len, out + 10, out + 10 + plain_len);
-	if (rc != TEE_SUCCESS)
+	if (rc != TEE_SUCCESS) {
+		fortress_log_gap();
 		return rc;
+	}
 	slot->tx = next;
 	params[1].memref.size = need;
 	IMSG("sealed service %u freshness %u", sid, next);
+	fortress_log_gap();
 	return TEE_SUCCESS;
 }
 
@@ -187,6 +191,7 @@ static TEE_Result cmd_open(uint32_t pt, TEE_Param params[4])
 		return TEE_ERROR_STORAGE_NO_SPACE;
 	if (freshness == 0) {
 		IMSG("rejected replay service %u freshness 0", sid);
+		fortress_log_gap();
 		return TEE_ERROR_SECURITY;
 	}
 	if (slot->rx == 0) {
@@ -194,6 +199,7 @@ static TEE_Result cmd_open(uint32_t pt, TEE_Param params[4])
 			return TEE_ERROR_SECURITY;
 	} else if (freshness <= slot->rx) {
 		IMSG("rejected replay service %u freshness %u", sid, freshness);
+		fortress_log_gap();
 		return TEE_ERROR_SECURITY;
 	} else if (freshness > slot->rx + FRESH_WINDOW) {
 		return TEE_ERROR_SECURITY;
@@ -205,6 +211,7 @@ static TEE_Result cmd_open(uint32_t pt, TEE_Param params[4])
 	rc = gcm_crypt(0, iv, frame, frame + 10, ct_len, out + 6, (uint8_t *)frame + 10 + ct_len);
 	if (rc != TEE_SUCCESS) {
 		IMSG("rejected tag service %u", sid);
+		fortress_log_gap();
 		return TEE_ERROR_SECURITY;
 	}
 	slot->rx = freshness;
@@ -216,6 +223,7 @@ static TEE_Result cmd_open(uint32_t pt, TEE_Param params[4])
 	out[5] = (uint8_t)(ct_len >> 8);
 	params[1].memref.size = 6u + ct_len;
 	IMSG("opened service %u freshness %u", sid, freshness);
+	fortress_log_gap();
 	return TEE_SUCCESS;
 }
 
